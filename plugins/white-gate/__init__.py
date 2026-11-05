@@ -9,6 +9,8 @@ from __future__ import annotations
 
 import json
 import logging
+import os
+import re
 import time
 from pathlib import Path
 
@@ -35,13 +37,32 @@ def _log(entry: dict) -> None:
         logger.debug("white-gate: could not write log", exc_info=True)
 
 
+def _approvals_bypassed() -> str:
+    """Hermes skips human approval under YOLO (set by `hermes -z` one-shot runs, the bench and practice)
+    or `approvals.mode: off`. White's gate then fails CLOSED: anything that needs the founder is blocked."""
+    if os.environ.get("HERMES_YOLO_MODE", "").strip().lower() in ("1", "true", "yes", "on"):
+        return "YOLO mode is on"
+    try:
+        cfg = (_home() / "config.yaml").read_text(encoding="utf-8", errors="replace")
+        block = re.search(r"^approvals:\s*\n((?:[ \t]+.*\n?)+)", cfg, re.M)
+        if block and re.search(r"^\s+mode:\s*['\"]?off\b", block.group(1), re.M):
+            return "approvals are switched off"
+    except Exception:
+        pass
+    return ""
+
+
 def _on_pre_tool_call(tool_name: str = "", args: dict | None = None, **kwargs):
     try:
         authority = load_authority(_home() / "founder" / "authority.yaml")
         decision = decide(tool_name, args or {}, authority)
     except Exception as exc:  # never fail open on an error in the gate itself
         logger.warning("white-gate error on %s: %s", tool_name, exc)
-        return {"action": "approve", "message": f"White's gate hit an error ({exc}); asking you first."}
+        error_msg = f"White's gate hit an error ({exc}); asking you first."
+        bypass = _approvals_bypassed()
+        if bypass:
+            return {"action": "block", "message": f"BLOCKED: {error_msg} ({bypass}, so nobody can approve)."}
+        return {"action": "approve", "message": error_msg}
 
     if decision.action != "allow" or decision.rule:
         _log({"ts": time.time(), "tool": tool_name, "action": decision.action,
@@ -51,6 +72,12 @@ def _on_pre_tool_call(tool_name: str = "", args: dict | None = None, **kwargs):
     if decision.action == "block":
         return {"action": "block", "message": decision.reason}
     if decision.action == "approve":
+        bypass = _approvals_bypassed()
+        if bypass:  # nobody can approve, and Hermes would auto-approve: fail closed
+            _log({"ts": time.time(), "tool": tool_name, "action": "block", "reason": f"{bypass}: {decision.reason}",
+                  "rule": decision.rule, "session_id": kwargs.get("session_id", "")})
+            return {"action": "block", "message": f"BLOCKED ({bypass}, so the founder can't approve): "
+                                                  f"{decision.reason} Prepare it and ask the founder instead."}
         return {"action": "approve", "message": decision.reason, "rule_key": decision.rule}
     return None
 

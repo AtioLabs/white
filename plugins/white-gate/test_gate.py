@@ -175,3 +175,29 @@ def test_skill_edits_go_through_white_improve():
 def test_protection_not_overridable_by_safe_tools():
     a = Authority(safe_tools=["write_file"])
     assert decide("write_file", {"path": "plugins/white-gate/__init__.py", "content": ""}, a).action == "approve"
+
+
+def _hook(tmp_path, monkeypatch):
+    import importlib.util
+    spec = importlib.util.spec_from_file_location("wg", Path(__file__).parent / "__init__.py")
+    mod = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(mod)
+    monkeypatch.setattr(mod, "_home", lambda: tmp_path)
+    return mod._on_pre_tool_call
+
+
+def test_yolo_turns_approvals_into_blocks(tmp_path, monkeypatch):
+    hook = _hook(tmp_path, monkeypatch)
+    monkeypatch.delenv("HERMES_YOLO_MODE", raising=False)
+    assert hook("send_message", {"to": "x", "text": "hi"})["action"] == "approve"
+    monkeypatch.setenv("HERMES_YOLO_MODE", "1")
+    r = hook("send_message", {"to": "x", "text": "hi"})
+    assert r["action"] == "block" and "YOLO" in r["message"]
+    assert hook("web_search", {"q": "x"}) is None  # reads still work
+
+
+def test_approvals_off_turns_approvals_into_blocks(tmp_path, monkeypatch):
+    monkeypatch.delenv("HERMES_YOLO_MODE", raising=False)
+    (tmp_path / "config.yaml").write_text("approvals:\n  mode: off\n  timeout: 300\n", encoding="utf-8")
+    hook = _hook(tmp_path, monkeypatch)
+    assert hook("send_message", {"to": "x", "text": "hi"})["action"] == "block"
