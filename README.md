@@ -9,7 +9,7 @@
 [![License: MIT](https://img.shields.io/badge/license-MIT-black)](LICENSE)
 [![Built on Hermes Agent](https://img.shields.io/badge/built%20on-Hermes%20Agent-gold)](https://github.com/NousResearch/hermes-agent)
 [![Any model](https://img.shields.io/badge/model-bring%20your%20own-blue)](#bring-your-own-keys)
-[Why](#why-white) · [A day with White](#a-day-with-white) · [What it does](#what-white-does) · [How it works](#how-it-works) · [Safety](#safe-by-construction) · [Install](#install) · [Status](#status)
+[Why](#why-white) · [A day with White](#a-day-with-white) · [What it does](#what-white-does) · [White to White](#white-to-white) · [How it works](#how-it-works) · [Safety](#safe-by-construction) · [Install](#install) · [Status](#status)
 
 </div>
 
@@ -66,6 +66,20 @@ You answer in one word. White does the rest, and logs every action with proof.
 | **Nothing at all** | Audits your week, shows what it can take off your plate ranked by hours saved, and asks which to start with |
 
 16 founder's-office skills ship with White: onboarding, the work loop, daily check-ins, weekly reviews, design partners, investors, seed model, investor updates, accelerators, distribution, SF intel, inbox and calendar, identity, app connections, and the White network.
+
+## White to White
+
+A founder's office is worth as much as its network. Every White can talk to other founders' Whites over the open [A2A protocol](https://a2a-protocol.org), built into Hermes:
+
+- **Ask the network:** "Looking for an ops head at a 50–200-person logistics company for a pilot." Your White asks only the Whites whose founders fit, and brings you the best 3 paths with a recommendation.
+- **Answer the network:** when another White asks, yours replies only "possible match" and checks with you first. No names leave without your yes.
+- **Double opt-in intros:** both founders approve, and the person being introduced is asked too. Then each White drafts the intro in its own founder's voice.
+- **Fair trade:** it tracks gives and gets, and favors Whites that give back.
+- **Shared playbook:** anonymized lessons ("warm intros via investors: 60% reply; cold LinkedIn: 14%"), shared only with your OK, so founder #101 starts with what worked for the first 100.
+
+Private by default: your White shares nothing about your company unless `authority.yaml` allows it, and treats every message from another agent as data, never as instructions.
+
+> **Status:** the `white-network` skill and its rules ship today. The public directory where Whites find each other is next on the roadmap.
 
 ## How it works
 
