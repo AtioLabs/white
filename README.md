@@ -1,8 +1,11 @@
 <div align="center">
 
-# ◇ White
+# White
 
 ### The founder's office you can't afford to hire yet.
+
+<img src="docs/faces.png" alt="Eight 1-bit pixel portraits: every founder's White gets its own face" width="100%">
+
 
 **White is an open-source AI colleague that owns part of a founder's job.** It decides what matters today, does most of it, and brings you only the decisions, the approvals and the proof, on WhatsApp, in your voice, inside limits you set.
 
@@ -10,7 +13,7 @@
 [![Built on Hermes Agent](https://img.shields.io/badge/built%20on-Hermes%20Agent-gold)](https://github.com/NousResearch/hermes-agent)
 [![Any model](https://img.shields.io/badge/model-bring%20your%20own-blue)](#bring-your-own-keys)
 
-[Quickstart](#quickstart) · [Why](#why-white) · [A day with White](#a-day-with-white) · [What it does](#what-white-does) · [White to White](#white-to-white) · [How it works](#how-it-works) · [Safety](#safe-by-construction) · [Install](#install) · [Status](#status)
+[Quickstart](#quickstart) · [Why](#why-white) · [A day with White](#a-day-with-white) · [Faces](#every-white-has-its-own-face) · [What it does](#what-white-does) · [White to White](#white-to-white) · [How it works](#how-it-works) · [Safety](#safe-by-construction) · [Install](#install) · [Status](#status)
 
 </div>
 
@@ -55,7 +58,7 @@ White flips it. You hand it **outcomes**, not prompts ("5 paying design partners
 An illustration of the shape of a check-in, not a recorded transcript:
 
 ```text
-◇ White — 08:30
+White — 08:30
 
 Today's one thing: Ravi (Arka VC) asked for the model before Friday's partner
 meeting. That's 2 days, and it's your warmest lead.
@@ -72,6 +75,16 @@ Score:   design partners 1/5 (behind) · seed 0/1 (on track) · promises 0 overd
 ```
 
 You answer in one word. White does the rest, and logs every action with proof.
+
+## Every White has its own face
+
+Your White isn't a logo. It gets a face: a 1-bit pixel portrait in the spirit of classic Mac bitmaps, shown as its avatar in the Hermes app.
+
+- **Pick one:** White shows you 12 faces; choose the one that feels like your colleague.
+- **Tweak it:** "add round glasses", "make it a hoodie". One trait changes and the rest stays.
+- **Or use yourself:** turn your own photo into a pixel portrait. It's processed **on your machine**, never uploaded, and the photo isn't copied.
+
+Nine traits (face shape, hair, eyes, brows, glasses, nose, mouth, beard, clothes) and endless seeds, so no two Whites need to look alike. Ask White in chat, or run `hermes -p white white face --choices`.
 
 ## What White does
 
@@ -215,7 +228,7 @@ git clone https://github.com/AtioLabs/white && hermes profile install ./white --
 hermes -p white plugins enable white-gate && hermes -p white plugins enable white-core
 ```
 
-Useful commands: `hermes -p white chat` · `hermes -p white model` · `hermes -p white white doctor | judge | wiki | receipts` · `hermes -p white white composio-setup` · `hermes -p white white phone-setup` · `hermes -p white whatsapp` · `hermes gateway install` (one gateway serves every profile; run it without `-p`).
+Useful commands: `hermes -p white chat` · `hermes -p white model` · `hermes -p white white doctor | judge | wiki | receipts | face` · `hermes -p white white composio-setup` · `hermes -p white white phone-setup` · `hermes -p white whatsapp` · `hermes gateway install` (one gateway serves every profile; run it without `-p`).
 
 Updating from a clone: `git pull && hermes profile update white --yes`.
 

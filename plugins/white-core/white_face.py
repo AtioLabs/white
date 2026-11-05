@@ -54,6 +54,9 @@ class Face:
     def from_seed(cls, seed: int, **fixed) -> "Face":
         rng = random.Random(seed)
         picks = {k: rng.choice(v) for k, v in OPTIONS.items()}
+        # balance: most random faces are clean-shaven (3 of 4 beard options are beards)
+        if rng.random() < 0.6:
+            picks["beard"] = "none"
         # keep combinations sensible
         if picks["hair"] == "cap" and rng.random() < 0.5:
             picks["brows"] = "flat"
