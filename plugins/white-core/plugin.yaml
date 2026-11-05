@@ -22,3 +22,5 @@ provides_tools:
   - white_desktop
   - white_scout
   - white_mastery
+  - white_gaps
+  - white_models

@@ -28,6 +28,8 @@ from white_intent import Intents, IntentError  # noqa: E402
 import white_desktop as desktop  # noqa: E402
 import white_scout as scout  # noqa: E402
 from white_mastery import Mastery  # noqa: E402
+import white_gaps as gaps  # noqa: E402
+import white_models as models  # noqa: E402
 
 _ctx = None  # set in register(); gives the supervisor its own LLM call via ctx.llm
 
@@ -364,7 +366,53 @@ def white_mastery(args: dict | None = None, **_: Any) -> str:
         return _err(str(e))
 
 
+def white_gaps(args: dict | None = None, **_: Any) -> str:
+    """What the founder and company lack: gather evidence, then write the report."""
+    args = args or {}
+    try:
+        if args.get("action", "gather") == "gather":
+            return _ok(gaps.gather(_home(), get_world()))
+        if args.get("action") == "write":
+            return _ok({"file": str(gaps.write(_home(), list(args.get("gaps") or [])))})
+        return _err("action must be gather or write")
+    except ValueError as e:
+        return _err(str(e))
+
+
+def white_models(args: dict | None = None, **_: Any) -> str:
+    """Open-weight model advice from live data: this machine, trending models, White's own routing."""
+    a = (args or {}).get("action", "hardware")
+    try:
+        if a == "hardware":
+            return _ok(models.hardware())
+        if a == "open_models":
+            return _ok(models.open_models())
+        if a == "routing":
+            return _ok(models.routing(_home()))
+        return _err("action must be hardware, open_models or routing")
+    except Exception as e:
+        return _err(f"model advisor failed: {e}")
+
+
 _TOOLS = {
+    "white_gaps": (
+        white_gaps,
+        "Growth partner: what the founder and company LACK to hit the charter. action=gather: evidence (charter "
+        "pace vs. time, overdue promises, stalled deals, runway, tool usage %, owned capabilities, rejected "
+        "guesses). action=write (gaps=[{gap, evidence, fix, owner white|founder|hire|partner}]): writes "
+        "founder/reports/gaps-<date>.md. Every gap needs evidence and a fix.",
+        {"action": {"type": "string"}, "gaps": {"type": "array", "items": {"type": "object"}}},
+        ["action"],
+    ),
+    "white_models": (
+        white_models,
+        "Model advisor. action=hardware: RAM, GPU, local runtimes, how big a model fits here. action=open_models: "
+        "live trending open-weight models (Hugging Face) with size, license and whether a 4-bit build fits this "
+        "machine. action=routing: what White runs on now. Explain in plain words; propose switches with cost/"
+        "speed/quality trade-offs and let the founder decide.",
+        {"action": {"type": "string"}},
+        ["action"],
+    ),
     "white_scout": (
         white_scout,
         "Capabilities. action=scan: what the founder already has (CLIs, skills, connected apps, model "
