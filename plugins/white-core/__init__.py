@@ -192,6 +192,19 @@ def white_review(args: dict | None = None, **_: Any) -> str:
         return _err(f"review failed: {e}")
 
 
+def white_status(args: dict | None = None, **_: Any) -> str:
+    """White's own setup health (the doctor), for guiding the founder in chat. Never contains secrets."""
+    try:
+        checks = doctor.run(_home())
+        todo = [c for c in checks if not c["ok"]]
+        return _ok({"ready": not any(c["level"] == "error" for c in todo),
+                    "todo": [{"name": c["name"], "level": c["level"], "fix": c["fix"], "detail": c["detail"]}
+                             for c in todo],
+                    "done": [c["name"] for c in checks if c["ok"]]})
+    except Exception as e:
+        return _err(f"status failed: {e}")
+
+
 def white_dispatch(args: dict | None = None, **_: Any) -> str:
     """Build a specialist card. The caller then passes `kanban_create` exactly as returned."""
     args = args or {}
@@ -209,6 +222,14 @@ def white_dispatch(args: dict | None = None, **_: Any) -> str:
 
 
 _TOOLS = {
+    "white_status": (
+        white_status,
+        "White's setup health: what's ready and what's missing (model, plugins, founder files, charter, "
+        "apps, WhatsApp schedule), each with the fix. Call at the start of a conversation; if anything is "
+        "missing, use the white-setup skill to walk the founder through it in plain words.",
+        {},
+        [],
+    ),
     "white_receipts": (
         lambda args=None, **kw: white_receipts(args, **kw),  # defined below with the CLI helpers
         "Write a public, verifiable log of what White did (names pseudonymized, never-share redacted, proofs "
