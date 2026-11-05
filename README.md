@@ -9,8 +9,6 @@
 [![License: MIT](https://img.shields.io/badge/license-MIT-black)](LICENSE)
 [![Built on Hermes Agent](https://img.shields.io/badge/built%20on-Hermes%20Agent-gold)](https://github.com/NousResearch/hermes-agent)
 [![Any model](https://img.shields.io/badge/model-bring%20your%20own-blue)](#bring-your-own-keys)
-[![Core bench](https://img.shields.io/badge/core%20bench-24%2F24-brightgreen)](#proof-not-promises)
-
 [Why](#why-white) · [A day with White](#a-day-with-white) · [What it does](#what-white-does) · [How it works](#how-it-works) · [Safety](#safe-by-construction) · [Install](#install) · [Status](#status)
 
 </div>
@@ -112,16 +110,6 @@ White acts in your name, so its limits are **code, not prompts**:
 - **It always says it's an AI** when it emails or calls as itself.
 
 Read [SECURITY.md](SECURITY.md) for the known limits.
-
-## Proof, not promises
-
-| Check | Result |
-|---|---|
-| Unit tests (gate, world model, judgment, supervisor, learning, receipts, setup) | 94 passing |
-| Founder's Office Bench: core layer (no model needed) | **24/24** across 10 scenarios |
-| Founder's Office Bench: agent layer (White vs plain Hermes, same model) | Ready to run; results will be published |
-
-The bench caught a real judgment bug before launch: an investor waiting on a reply ranked below a stale pipeline item. A chief of staff answers people first, so now White does too.
 
 ## Install
 
