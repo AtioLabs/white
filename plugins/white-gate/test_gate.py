@@ -152,3 +152,26 @@ def test_desktop_enter_needs_approval():
 def test_raw_agent_desktop_action_in_shell_needs_approval():
     assert decide("terminal", {"command": "agent-desktop click @s1:e8"}, EMPTY).action == "approve"
     assert decide("terminal", {"command": "agent-desktop snapshot --app Slack -i"}, EMPTY).action == "allow"
+
+
+def test_white_cannot_rewrite_its_own_code_or_authority():
+    p = r"C:\Users\x\AppData\Local\hermes\profiles\white\plugins\white-core\white_world.py"
+    assert decide("write_file", {"path": p, "content": "x"}, EMPTY).action == "approve"
+    assert decide("patch", {"path": "founder/authority.yaml", "patch": "x"}, EMPTY).action == "approve"
+    assert decide("terminal", {"command": f"python -c \"open(r'{p}','w').write('x')\""}, EMPTY).action == "approve"
+    assert decide("terminal", {"command": "Set-Content config.yaml 'model: x'"}, EMPTY).action == "approve"
+
+
+def test_reading_own_code_and_normal_writes_pass():
+    assert decide("terminal", {"command": "type plugins\white-core\white_world.py"}, EMPTY).action == "allow"
+    assert decide("write_file", {"path": "founder/drafts/proposal.md", "content": "x"}, EMPTY).action == "allow"
+
+
+def test_skill_edits_go_through_white_improve():
+    assert decide("skill_manage", {"action": "patch", "name": "white-cycle"}, EMPTY).action == "approve"
+    assert decide("skill_manage", {"action": "view", "name": "white-cycle"}, EMPTY).action == "allow"
+
+
+def test_protection_not_overridable_by_safe_tools():
+    a = Authority(safe_tools=["write_file"])
+    assert decide("write_file", {"path": "plugins/white-gate/__init__.py", "content": ""}, a).action == "approve"

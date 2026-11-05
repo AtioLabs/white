@@ -72,6 +72,10 @@ if ($envText -notmatch "(?m)^WHATSAPP_REPLY_PREFIX=") {
     [System.IO.File]::WriteAllText($envPath, $envText + $sep + $line + "`n", $utf8NoBom)
 }
 Ok "Safety gate and core are on"
+# Spend limits per run: a stuck loop can't burn through a founder's model credit.
+& $Hermes -p $Profile config set agent.max_turns 60 2>&1 | Out-Null
+& $Hermes -p $Profile config set agent.budget_warning_ratio 0.75 2>&1 | Out-Null
+& $Hermes -p $Profile config set agent.run_budget_seconds 900 2>&1 | Out-Null
 # White Inbox on the Desktop: drop anything there, White files it and does the work.
 $WhiteInbox = Join-Path ([Environment]::GetFolderPath("Desktop")) "White Inbox"
 New-Item -ItemType Directory -Force $WhiteInbox | Out-Null

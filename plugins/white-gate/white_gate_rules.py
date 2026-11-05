@@ -44,6 +44,13 @@ OUTWARD_CLICK_WORDS = re.compile(
     re.IGNORECASE,
 )
 SCREEN_TOOLS = frozenset({"browser_exec", "browser_cdp", "browser_dialog", "computer_use"})
+PROTECTED_PATHS = re.compile(
+    r"(plugins[/\\]+white-(core|gate)\b|\bauthority\.ya?ml\b|\bconfig\.ya?ml\b|\bSOUL\.md\b|"
+    r"[/\\]\.env\b|^\.env\b|\bwhite[/\\]+scout\.json\b)", re.IGNORECASE | re.MULTILINE)
+SHELL_WRITE = re.compile(
+    r"(>|Set-Content|Add-Content|Out-File|Copy-Item|Move-Item|Remove-Item|New-Item|\bcp\b|\bmv\b|\brm\b|"
+    r"sed\s+-i|\btee\b|open\([^)]*['\"][wa]|write_text|write_bytes|shutil\.(copy|move|rmtree)|os\.remove|unlink)",
+    re.IGNORECASE)
 DESKTOP_SEND_KEYS = re.compile(r"\b(enter|return)\b", re.IGNORECASE)
 DESKTOP_RAW_ACT = re.compile(
     r"\bagent-desktop\b.*\b(click|double-click|right-click|type|set-value|press|select|toggle|check|"
@@ -133,8 +140,25 @@ def _name_matches(pattern: str, tool_name: str) -> bool:
     return pattern == tool_name
 
 
+def touches_protected(tool_name: str, args: Any) -> Optional[str]:
+    """White must not rewrite its own code, authority or config, or its skills outside the bench-gated
+    white_improve loop. (A live test caught White patching white_world.py to work around a bug.)"""
+    text = _args_text(args)
+    if tool_name in ("write_file", "patch") and PROTECTED_PATHS.search(text):
+        return f"'{tool_name}' would change White's own code, authority or config"
+    if tool_name in ("terminal", "execute_code") and PROTECTED_PATHS.search(text) and SHELL_WRITE.search(text):
+        return "shell command would change White's own code, authority or config"
+    if tool_name == "skill_manage" and isinstance(args, dict) and \
+            str(args.get("action") or "").lower() not in ("view", "list", "read", "search", "show", ""):
+        return "skill changes go through white_improve (bench-tested, with undo)"
+    return None
+
+
 def is_outward(tool_name: str, args: Any, authority: Authority) -> Optional[str]:
-    """Return a short reason if this call is outward, else None."""
+    """Return a short reason if this call is outward (or self-modifying), else None."""
+    protected = touches_protected(tool_name, args)
+    if protected:
+        return protected  # not overridable by safe_tools
     if any(_name_matches(p, tool_name) for p in authority.safe_tools):
         return None
     if tool_name in OUTWARD_TOOLS or any(_name_matches(p, tool_name) for p in authority.extra_outward_tools):

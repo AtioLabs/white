@@ -38,6 +38,10 @@ fi
 say "Step 3 of 5: switching on White's safety gate and core..."
 hermes -p "$PROFILE" plugins enable white-gate >/dev/null 2>&1
 hermes -p "$PROFILE" plugins enable white-core >/dev/null 2>&1
+# Spend limits per run: a stuck loop can't burn through a founder's model credit.
+hermes -p "$PROFILE" config set agent.max_turns 60 >/dev/null 2>&1
+hermes -p "$PROFILE" config set agent.budget_warning_ratio 0.75 >/dev/null 2>&1
+hermes -p "$PROFILE" config set agent.run_budget_seconds 900 >/dev/null 2>&1
 ok "Safety gate and core are on"
 
 CFG="${HERMES_HOME:-$HOME/.hermes}/profiles/$PROFILE/config.yaml"
