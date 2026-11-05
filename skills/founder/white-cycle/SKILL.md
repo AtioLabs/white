@@ -44,6 +44,8 @@ Deliver to the founder's home channel. Log the setup with `white_log` (kind=acti
 
 ### 1. Take in events
 
+**Inbox first.** Call `white_inbox` action=scan. The founder drops anything there (local `founder/inbox/` or the Google Drive folder in `founder/inbox.yaml`) and never explains it: work out what it is and what it implies yourself. For each new item: record its people, orgs, deals, commitments and numbers with `source` = the item's `source`; then do the work it implies (a new deck → update the seed model and pipeline notes; a term sheet → summarise terms and flag the decisions). No-risk work: just do it. Risky work (outward, money, irreversible, reputation, never-share): prepare it and ask the founder for one decision. Then call action=file with a one-line summary and the work done. If no text was extracted, open the file with your own tools.
+
 Read what changed since the last cycle: new email (inbox and sent), calendar changes, replies on kanban cards, A2A messages, and, if `white-identity` is set up, White's own inbox (AgentMail) and calls and texts (AgentPhone). With `white-connect`, read the founder's apps through Composio using read-only slugs (e.g. `GMAIL_FETCH_EMAILS`, `GOOGLECALENDAR_LIST_EVENTS`). For each **meaningful** item, call `white_log` kind=signal with `source` = the stable id (e.g. `gmail:<message-id>`, `cal:<event-id>`). Re-ingesting the same id is a no-op, so re-scanning is safe. Skip newsletters and notifications.
 
 From each meaningful item, also update the world model:

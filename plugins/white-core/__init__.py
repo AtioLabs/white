@@ -23,6 +23,7 @@ import white_learning as learning  # noqa: E402
 import white_doctor as doctor  # noqa: E402
 import white_team as team  # noqa: E402
 import white_receipts as receipts  # noqa: E402
+from white_inbox import Inbox, load_folders  # noqa: E402
 
 _ctx = None  # set in register(); gives the supervisor its own LLM call via ctx.llm
 
@@ -241,7 +242,50 @@ def white_dispatch(args: dict | None = None, **_: Any) -> str:
         return _err(str(e))
 
 
+_inbox_cache: dict[str, Inbox] = {}
+
+
+def get_inbox(home: Path | None = None) -> Inbox:
+    home = home or _home()
+    key = str(home)
+    if key not in _inbox_cache:
+        (home / "founder" / "inbox").mkdir(parents=True, exist_ok=True)
+        _inbox_cache[key] = Inbox(home / "white" / "inbox.db", load_folders(home))
+    return _inbox_cache[key]
+
+
+def white_inbox(args: dict | None = None, **_: Any) -> str:
+    """The founder's drop folder: scan for new files, file them once handled, or list recent."""
+    args = args or {}
+    try:
+        ib = get_inbox()
+        action = args.get("action", "scan")
+        if action == "scan":
+            items = ib.scan()
+            for it in items:  # each drop is also a signal, so judgment sees it
+                get_world().add_signal("inbox", f"Founder dropped {it['name']}", it["source"])
+            return _ok({"folders": [str(f) for f in ib.folders], "new": items,
+                        "next": "For each item: record facts with source=item.source, do the work it implies "
+                                "(risky work → ask the founder), then call action=file with summary and work."})
+        if action == "file":
+            return _ok(ib.file(str(args.get("sha", "")), str(args.get("summary", "")), str(args.get("work", ""))))
+        if action == "recent":
+            return _ok(ib.recent(int(args.get("limit") or 20)))
+        return _err("action must be scan, file or recent")
+    except (ValueError, WorldError) as e:
+        return _err(str(e))
+
+
 _TOOLS = {
+    "white_inbox": (
+        white_inbox,
+        "The founder's inbox folder (founder/inbox plus folders in founder/inbox.yaml, e.g. Google Drive). "
+        "action=scan: new files with extracted text and a source id. action=file (sha, summary, work): mark "
+        "handled and move to Filed/YYYY-MM. action=recent (limit): what was filed.",
+        {"action": {"type": "string"}, "sha": {"type": "string"}, "summary": {"type": "string"},
+         "work": {"type": "string"}, "limit": {"type": "integer"}},
+        ["action"],
+    ),
     "white_face": (
         white_face,
         "White's face: a 1-bit pixel portrait used as its avatar in the Hermes app. action=choices shows a sheet "

@@ -17,3 +17,4 @@ provides_tools:
   - white_receipts
   - white_status
   - white_face
+  - white_inbox
