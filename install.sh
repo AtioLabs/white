@@ -50,6 +50,15 @@ else
   ok "Step 4 of 5: model already set"
 fi
 
+# White Inbox on the Desktop: drop anything there, White files it and does the work.
+WHITE_INBOX="$HOME/Desktop/White Inbox"
+mkdir -p "$WHITE_INBOX"
+INBOX_CFG="${HERMES_HOME:-$HOME/.hermes}/profiles/$PROFILE/founder/inbox.yaml"
+mkdir -p "$(dirname "$INBOX_CFG")"
+[ -f "$INBOX_CFG" ] || echo "folders:" > "$INBOX_CFG"
+grep -qF "$WHITE_INBOX" "$INBOX_CFG" || echo "  - $WHITE_INBOX" >> "$INBOX_CFG"
+ok "White Inbox is on your Desktop"
+
 say "Step 5 of 5: opening the Hermes desktop app..."
 echo "  The very first launch may build the app (5-10 minutes). Progress shows below; the app opens when ready."
 printf '\n  When the app opens: pick "white" and say: hi. White walks you through the rest.\n\n'

@@ -72,6 +72,16 @@ if ($envText -notmatch "(?m)^WHATSAPP_REPLY_PREFIX=") {
     [System.IO.File]::WriteAllText($envPath, $envText + $sep + $line + "`n", $utf8NoBom)
 }
 Ok "Safety gate and core are on"
+# White Inbox on the Desktop: drop anything there, White files it and does the work.
+$WhiteInbox = Join-Path ([Environment]::GetFolderPath("Desktop")) "White Inbox"
+New-Item -ItemType Directory -Force $WhiteInbox | Out-Null
+$inboxCfg = Join-Path $ProfileHome "founder\inbox.yaml"
+New-Item -ItemType Directory -Force (Split-Path $inboxCfg) | Out-Null
+if (-not (Test-Path $inboxCfg) -or -not (Select-String -Path $inboxCfg -SimpleMatch $WhiteInbox -Quiet)) {
+    if (-not (Test-Path $inboxCfg)) { [System.IO.File]::WriteAllText($inboxCfg, "folders:`n", $utf8NoBom) }
+    [System.IO.File]::AppendAllText($inboxCfg, "  - $WhiteInbox`n", $utf8NoBom)
+}
+Ok "White Inbox is on your Desktop"
 
 # 4. Model
 $cfg = Join-Path $ProfileHome "config.yaml"
