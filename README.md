@@ -1,63 +1,131 @@
-# White
+<div align="center">
 
-**An open-source AI founder's office. Not a tool you prompt, but a colleague that owns part of your job.**
+# ◇ White
 
-White decides what matters most each day, does most of it, and brings you only the decisions, approvals and proof: in your WhatsApp, in your voice, within the authority you grant. It runs on [Hermes Agent](https://github.com/NousResearch/hermes-agent) with any model you bring.
+### The founder's office you can't afford to hire yet.
 
-> Most agents wait for you to say what to do. But founders often don't know what to ask. That's the job. White brings the founder's-office expertise itself: it proposes, pushes back with evidence, and follows through.
-> — from ["What humans can do"](https://www.asynarch.com/writing/what-humans-can-do)
+**White is an open-source AI colleague that owns part of a founder's job.** It decides what matters today, does most of it, and brings you only the decisions, the approvals and the proof, on WhatsApp, in your voice, inside limits you set.
 
-## A colleague, not a tool
+[![License: MIT](https://img.shields.io/badge/license-MIT-black)](LICENSE)
+[![Built on Hermes Agent](https://img.shields.io/badge/built%20on-Hermes%20Agent-gold)](https://github.com/NousResearch/hermes-agent)
+[![Any model](https://img.shields.io/badge/model-bring%20your%20own-blue)](#bring-your-own-keys)
+[![Core bench](https://img.shields.io/badge/core%20bench-24%2F24-brightgreen)](#proof-not-promises)
 
-| A tool | White |
-|---|---|
-| Waits for a prompt | Runs its own loop every 2 hours and checks in every morning on WhatsApp |
-| Does the task asked | Owns outcomes with targets ("5 paying design partners by Jan 31") |
-| Executes | Says what matters and challenges you when your time and the data disagree |
-| Forgets | Keeps a world model of your people, deals, promises and runway, every fact sourced |
-| You check its work | A separate supervisor checks every draft before you see it |
-| Can do anything it's told | Can't send anything in your name without approval. Enforced in code, not a prompt |
-| Same forever | Learns from your edits and choices, and practices on a bench to get better |
+[Why](#why-white) · [A day with White](#a-day-with-white) · [What it does](#what-white-does) · [How it works](#how-it-works) · [Safety](#safe-by-construction) · [Install](#install) · [Status](#status)
 
-## What it takes off your plate
+</div>
 
-| Skill | What White does |
-|---|---|
-| `founder-onboarding` | Learns your voice from your real writing, your company, and your authority rules. Audits your week and proposes what to take over. |
-| `outcome-engine` / `white-cycle` | Turns a goal into tracked work and drives it every 2 hours without being prompted |
-| `morning-checkin` / `weekly-review` | One short message a day that leads with what matters; a Monday 1:1 with misses reported honestly |
-| `design-partner-hunt` | Finds companies showing the pain right now, warm paths first, through to a paid design-partner deal |
-| `investor-outreach` / `seed-model` / `investor-update` | Investors with a real reason to care, a seed model that guides you with sourced benchmarks, monthly updates |
-| `accelerator-apply` / `distribution` / `sf-intel` | Deadlines and applications, posts in your voice, a weekly "what SF shipped and what it means for you" |
-| `inbox-calendar-meetings` | Triage, scheduling, meeting briefs and follow-ups |
-| `white-identity` / `white-connect` / `white-network` | Its own inbox and number, your apps through Composio, and intros with other founders' Whites over A2A |
+---
 
-## How it's built
+## Why White
 
+Founders in SF have a founder's office: someone who chases the follow-ups, builds the model, finds the design partners, preps the meetings and tells them what they're neglecting. Most founders everywhere else have a chat box and a to-do list.
+
+Today's agents made that worse in a new way: **you have to know what to ask.** You end up as the prompter, the project manager and the reviewer of your own assistant.
+
+White flips it. You hand it **outcomes**, not prompts ("5 paying design partners by January"), and it does the job the way a sharp chief of staff would:
+
+- **It leads.** It opens every day with the one thing that matters and why, from the numbers.
+- **It guides, it doesn't interrogate.** It proposes answers with sourced benchmarks and pushes back when your plan and the data disagree.
+- **It follows through.** It runs its own loop every two hours and only interrupts you when you're needed.
+- **It shows receipts.** Nothing counts as done without proof.
+
+> *"You know what you want to achieve. That doesn't mean you know what to ask for."*
+> — [What humans can do](https://www.asynarch.com/writing/what-humans-can-do), the essay White is built on
+
+## A day with White
+
+An illustration of the shape of a check-in, not a recorded transcript:
+
+```text
+◇ White — 08:30
+
+Today's one thing: Ravi (Arka VC) asked for the model before Friday's partner
+meeting. That's 2 days, and it's your warmest lead.
+I've drafted the reply and updated the model's churn assumption (3%/mo, seed
+B2B benchmark, source linked). Approve and I'll send it.
+
+Challenge: design partners are 1/5 with 40 days left, and nothing moved this
+week. I recommend 3 hours on Thursday for the 6 warm intros I've queued, or we
+move the date. Which?
+
+Approve: 1) reply to Ravi + model   2) intro request to Meera (Lumen)
+Done:    LogiCo pilot signed (contract linked) · 14 prospects researched
+Score:   design partners 1/5 (behind) · seed 0/1 (on track) · promises 0 overdue
 ```
-Hermes (the body): any model · tools · browser · own computer · WhatsApp/email · cron · kanban · A2A
-White core (plugins, tested code):
-  white-gate   authority gate on every tool call: block leaks, approval for anything outward
-  white-core   world model · judgment engine · supervisor · learning · scorecard · specialists ·
-               receipts · doctor · Composio/phone setup
-White skills (the training): 16 founder's-office skills, plus vendored Composio
-Bench: 10 scenarios. Core layer runs without a model; agent layer scores White vs plain Hermes
+
+You answer in one word. White does the rest, and logs every action with proof.
+
+## What White does
+
+| You hand White | What it does without being asked |
+|---|---|
+| **"Find design partners"** | Defines your ideal partner, finds companies showing the pain *right now* (hiring posts, complaints, tool switches), warm paths first, writes signal-specific outreach in your voice, preps your calls, drives each one to a paid decision |
+| **"Get me ready for the seed"** | Builds a driver-based model with every assumption sourced, stress-tests it like an investor would, matches investors who have a real reason to care, writes personal emails, tracks the pipeline |
+| **"Keep me on top of everything"** | Triages your inbox, books and protects your calendar, briefs you before meetings, sends follow-ups after, and never lets a promise go overdue |
+| **"Help us get seen"** | Picks the 1–2 channels your buyers use and turns real progress and customer stories into posts that sound like you |
+| **"Don't let SF leave us behind"** | A weekly brief: what shipped and what changed, with *so what for us* and one action |
+| **Nothing at all** | Audits your week, shows what it can take off your plate ranked by hours saved, and asks which to start with |
+
+16 founder's-office skills ship with White: onboarding, the work loop, daily check-ins, weekly reviews, design partners, investors, seed model, investor updates, accelerators, distribution, SF intel, inbox and calendar, identity, app connections, and the White network.
+
+## How it works
+
+White is a **worker runtime**, not a prompt pack. Skills are its training; the job is done by code with state, judgment and enforced authority.
+
+```text
+                         ┌─────────────── you (WhatsApp) ───────────────┐
+                         │   decisions · approvals · daily check-in     │
+                         └───────────────────────▲──────────────────────┘
+┌─────────────────────────── WHITE CORE ─────────┴─────────────────────────────┐
+│  Charter ──► World model ──► Event loop ──► Judgment ──► Specialists         │
+│  (what it    (people, deals,  (every 2h +   (what matters  (outreach, research,│
+│   owns)       promises, runway) on events)   most, and why)  content, finance, ops)│
+│                                     ▲                         │              │
+│        Learning ◄── Scorecard ◄── Supervisor ◄── Authority gate ◄─┘          │
+│      (your edits      (misses,      (checks every    (nothing leaves without  │
+│       teach it)       reported)      draft)           your OK, in code)       │
+└──────────────────────────────────────▲───────────────────────────────────────┘
+┌──────────────────────────── HERMES AGENT ┴───────────────────────────────────┐
+│  any model · tools · browser · its own computer · WhatsApp · email · cron ·  │
+│  kanban · A2A · Composio (Gmail, Calendar, LinkedIn, Slack, Notion, …)       │
+└──────────────────────────────────────────────────────────────────────────────┘
 ```
 
-| Piece | What it does |
+| Layer | What it is | Why it matters |
+|---|---|---|
+| **World model** | SQLite: people, orgs, pipeline, commitments, signals, decisions, actions, lessons, runway. Every fact needs a source; "done" needs proof. | State lives outside the model, so White doesn't forget or invent |
+| **Judgment engine** | Code scores open work: gap to target × deadline × pace × runway × neglect, plus people waiting on you and overdue promises. The model reasons over the ranking. | Consistent priorities you can audit, not vibes |
+| **Supervisor** | Code checks (leaks, words you never use, AI tells, length, sources, proof), then a separate model review | You see work that's already been checked |
+| **Learning** | Your edits become voice lessons, your accept/reject choices tune its priorities within bounds, and a weekly scorecard reports misses | It gets better at *your* job, the way a hire does |
+| **Specialists** | Outreach, research, content, finance and ops workers on Hermes kanban, each with role rules | White orchestrates; work runs in parallel |
+| **Practice runs** | White proposes edits to its own skills and keeps one only if the bench score rises with no safety check lost | Improves the harness, not the model (after Google Research's Harness²) |
+| **Receipts** | `white receipts`: a public, redacted log with SHA-256 proof fingerprints | Build in public with proof anyone can verify |
+
+## Safe by construction
+
+White acts in your name, so its limits are **code, not prompts**:
+
+- **The authority gate** sits in front of every tool call. Messages, email, posts, form submits, payments, calls, SMS, agent-to-agent messages, and Composio actions hidden inside router arguments (e.g. `GMAIL_SEND_EMAIL`) all need your approval, unless you granted a narrow standing permission. Anything on your never-share list is blocked outright. If the gate fails, it fails closed.
+- **Unattended runs can't approve anything.** Scheduled cycles prepare drafts; you approve.
+- **Keys never leave `.env`.** Config references them as `${NAME}`, and the setup commands refuse to write raw keys.
+- **It always says it's an AI** when it emails or calls as itself.
+
+Read [SECURITY.md](SECURITY.md) for the known limits.
+
+## Proof, not promises
+
+| Check | Result |
 |---|---|
-| **Authority gate** | A Hermes `pre_tool_call` hook. Messages, email, posts, form submits, payments, calls, SMS, A2A, and Composio actions (e.g. `GMAIL_SEND_EMAIL` inside a router call) need your approval unless you granted a standing permission. Never-share items are blocked outright. Fails closed. |
-| **World model** | SQLite holding people, orgs, pipeline, commitments, signals, decisions, actions, lessons and runway. No source, no fact. "Done" needs proof. Readable as a nightly wiki. |
-| **Judgment engine** | Scores open work in code (gap to target × deadline × pace × runway × neglect, plus people waiting on you and promises overdue) and raises challenges. The model reasons over the ranking instead of guessing. |
-| **Supervisor** | Code checks (leaks, words you never use, AI tells, length, sources, proof, placeholders), then a separate model review. |
-| **Learning** | Your edits become voice lessons. Accepted or rejected recommendations shift priorities within bounds. Weekly scorecard. |
-| **Specialists** | Outreach, research, content, finance and ops workers via kanban, each with role rules. White orchestrates. |
-| **Practice runs** | White proposes changes to its own skills and keeps one only if the bench score rises with no safety check lost (after Google Research's Harness²). |
-| **Receipts** | `white receipts` writes a public, redacted log of what White did, with SHA-256 proof fingerprints anyone can verify once you reveal a proof. |
+| Unit tests (gate, world model, judgment, supervisor, learning, receipts, setup) | 94 passing |
+| Founder's Office Bench: core layer (no model needed) | **24/24** across 10 scenarios |
+| Founder's Office Bench: agent layer (White vs plain Hermes, same model) | Ready to run; results will be published |
 
-## Install (Windows)
+The bench caught a real judgment bug before launch: an investor waiting on a reply ranked below a stale pipeline item. A chief of staff answers people first, so now White does too.
 
-Needs Git and Windows PowerShell. Clone both repos side by side:
+## Install
+
+**Windows** (macOS and Linux below). Clone White next to Hermes and run the setup:
 
 ```powershell
 git clone https://github.com/NousResearch/hermes-agent
@@ -65,56 +133,51 @@ git clone https://github.com/<you>/white
 powershell -ExecutionPolicy Bypass -File .\white\setup-white.ps1
 ```
 
-The script installs the Hermes runtime if needed, installs or updates the White profile, enables its plugins, asks for a model if none is set, and runs `white doctor`. Then:
+It installs the Hermes runtime if needed, installs White as a Hermes profile, enables its plugins, asks for a model, and runs `white doctor`, which tells you exactly what's left to fix. Then:
 
 ```powershell
 .\hermes-agent\.hermes\bin\hermes.exe -p white chat
 ```
 
-Say **"run founder-onboarding"**. White reads your public writing, drafts your voice and company profile for you to correct, proposes its charter and authority, audits your week, and sets up its own schedule.
+Say **"run founder-onboarding"**. White reads your public writing, drafts your voice and company profile for you to correct, proposes its charter and authority, audits your week, and schedules itself.
 
-macOS and Linux: Hermes supports both. Install Hermes with its own instructions, then run `hermes profile install ./white` and `hermes -p white plugins enable white-gate white-core`.
+**macOS / Linux:** install Hermes from its repo, then `hermes profile install ./white` and `hermes -p white plugins enable white-gate white-core`.
 
 ### Bring your own keys
 
-All keys go in the White profile's `.env` (`%LOCALAPPDATA%\hermes\profiles\white\.env` on Windows). Never paste them into a chat.
+Everything is optional except a model. Keys go in the White profile's `.env` (on Windows, `%LOCALAPPDATA%\hermes\profiles\white\.env`), never in a chat.
 
-| What | Key | Then |
+| For | Add to `.env` | Then run |
 |---|---|---|
-| Model (any Hermes provider) | e.g. `GOOGLE_API_KEY`, `OPENROUTER_API_KEY` | `hermes -p white model` |
-| Your apps (Gmail, Calendar, LinkedIn, Slack, …) | `COMPOSIO_API_KEY=ak_…` | `hermes -p white white composio-setup` |
-| White's own inbox (optional) | `AGENTMAIL_API_KEY` | say "run white-identity" |
-| White's own phone (optional, US/CA) | `AGENTPHONE_API_KEY` | `hermes -p white white phone-setup` |
-| WhatsApp check-ins | none | `hermes -p white whatsapp`, then `hermes gateway install` |
+| **A model** (any Hermes provider) | e.g. `GOOGLE_API_KEY`, `OPENROUTER_API_KEY` | `hermes -p white model` |
+| **Your apps** via Composio | `COMPOSIO_API_KEY=ak_…` | `hermes -p white white composio-setup` |
+| **WhatsApp check-ins** | none | `hermes -p white whatsapp` → `hermes gateway install` |
+| White's **own inbox** | `AGENTMAIL_API_KEY` | say "run white-identity" |
+| White's **own phone** (US/CA) | `AGENTPHONE_API_KEY` | `hermes -p white white phone-setup` |
 
-Check everything with `hermes -p white white doctor`. Other commands: `white judge` (what matters today), `white wiki`, `white receipts`.
+Useful anytime: `white doctor` (health), `white judge` (what matters today), `white wiki` (readable world model), `white receipts`.
 
-## Your data
+## Your data stays yours
 
-Everything lives in your Hermes profile, never in this repo:
-
-- `founder/voice.md`, `company.md`: who you are and how you write
-- `founder/charter.yaml`: what White owns, with targets
-- `founder/authority.yaml`: never-share list and standing permissions, enforced by the gate
-- `founder/wiki/`: readable pages generated from the world model
-- `white/world.db`, `white/gate-log.jsonl`, `white/weights.yaml`: state, the approval log, learned priorities
-
-## Develop
-
-```bash
-python -m pip install pytest pyyaml
-python -m pytest plugins bench -q            # unit tests
-python bench/core_bench.py                   # core bench, no model needed
-python bench/agent_bench.py --profile-dir <profile> --hermes <hermes>     # needs a model
-python bench/practice.py --profile-dir <profile> --hermes <hermes> --skill morning-checkin
-```
-
-Design: [DESIGN.md](DESIGN.md) · Security: [SECURITY.md](SECURITY.md) · Contributing: [CONTRIBUTING.md](CONTRIBUTING.md)
+Nothing about you lives in this repo. Your voice, company, charter, authority rules, world model, approval log and learned priorities stay in your local Hermes profile. White calls only the model and the services you connect.
 
 ## Status
 
-Early and honest. The core is built and tested (94 unit tests, core bench at 100%), and it runs end to end on the author's machine with WhatsApp check-ins. It hasn't yet proven itself across a real founder's weeks. Numbers will be published from the bench and from real use: receipts, not counters.
+**Early, and honest about it.** The core is built and tested, and White runs end to end on the author's machine with WhatsApp check-ins and Composio. It hasn't yet proven itself across many founders' real weeks. That's the next milestone, and the numbers will be published as receipts, not counters.
+
+**Next up:** agent-bench results against plain Hermes · the public White network directory · an official WhatsApp Business API path · macOS/Linux one-command setup.
+
+## Contributing
+
+One bar for every change: **does it make White more of a colleague, or more of a tool?** Read [CONTRIBUTING.md](CONTRIBUTING.md) and [DESIGN.md](DESIGN.md).
+
+```bash
+python -m pip install pytest pyyaml
+python -m pytest plugins bench -q && python bench/core_bench.py
+```
 
 ## License
 
-MIT. See [LICENSE](LICENSE) and [NOTICE](NOTICE).
+[MIT](LICENSE). Built on [Hermes Agent](https://github.com/NousResearch/hermes-agent) by Nous Research. Third-party notices in [NOTICE](NOTICE).
+
+<div align="center"><sub>Built by <a href="https://www.asynarch.com">Asrul Ishath</a>, a founder outside SF, for founders outside SF.</sub></div>
