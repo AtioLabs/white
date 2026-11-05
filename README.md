@@ -8,10 +8,24 @@
 
 [![License: MIT](https://img.shields.io/badge/license-MIT-black)](LICENSE)
 [![Built on Hermes Agent](https://img.shields.io/badge/built%20on-Hermes%20Agent-gold)](https://github.com/NousResearch/hermes-agent)
-[![Any model](https://img.shields.io/badge/model-bring%20your%20own-blue)](#bring-your-own-keys)
-[Why](#why-white) · [A day with White](#a-day-with-white) · [What it does](#what-white-does) · [White to White](#white-to-white) · [How it works](#how-it-works) · [Safety](#safe-by-construction) · [Install](#install) · [Status](#status)
+[![Any model](https://img.shields.io/badge/model-bring%20your%20own-blue)](#3-give-white-a-brain)
+
+[Quickstart](#quickstart) · [Why](#why-white) · [A day with White](#a-day-with-white) · [What it does](#what-white-does) · [White to White](#white-to-white) · [How it works](#how-it-works) · [Safety](#safe-by-construction) · [Install](#install) · [Status](#status)
 
 </div>
+
+---
+
+## Quickstart
+
+```powershell
+git clone https://github.com/NousResearch/hermes-agent
+git clone https://github.com/AtioLabs/white
+powershell -ExecutionPolicy Bypass -File .\white\setup-white.ps1
+.\hermes-agent\.hermes\bin\hermes.exe -p white chat
+```
+
+Then say **"run founder-onboarding"**. That's Windows; for macOS/Linux, the step-by-step guide and WhatsApp setup, see [Install](#install).
 
 ---
 
@@ -127,7 +141,21 @@ Read [SECURITY.md](SECURITY.md) for the known limits.
 
 ## Install
 
-**Windows** (macOS and Linux below). Clone White next to Hermes and run the setup:
+About 15 minutes the first time. White runs on your own machine; nothing is hosted for you.
+
+### 1. What you need
+
+| | Windows | macOS / Linux |
+|---|---|---|
+| Git | [git-scm.com](https://git-scm.com) | usually preinstalled |
+| A model key | free [Gemini key](https://aistudio.google.com) to start, or any [Hermes provider](https://github.com/NousResearch/hermes-agent) | same |
+| For WhatsApp (optional) | Node.js 18+ | Node.js 18+ |
+
+Hermes installs its own Python; you don't need one.
+
+### 2. Install Hermes and White
+
+**Windows (PowerShell):** clone both repos side by side and run White's setup:
 
 ```powershell
 git clone https://github.com/NousResearch/hermes-agent
@@ -135,29 +163,101 @@ git clone https://github.com/AtioLabs/white
 powershell -ExecutionPolicy Bypass -File .\white\setup-white.ps1
 ```
 
-It installs the Hermes runtime if needed, installs White as a Hermes profile, enables its plugins, asks for a model, and runs `white doctor`, which tells you exactly what's left to fix. Then:
+The script installs the Hermes runtime (first run takes a few minutes), installs White as a Hermes profile called `white`, enables its two plugins, asks for a model if you don't have one, and finishes with `white doctor`. It's safe to re-run anytime; it never touches your keys or data.
 
-```powershell
-.\hermes-agent\.hermes\bin\hermes.exe -p white chat
+**macOS / Linux:** install Hermes with its official installer, then add White:
+
+```bash
+curl -fsSL https://hermes-agent.nousresearch.com/install.sh | bash
+git clone https://github.com/AtioLabs/white
+hermes profile install ./white --yes
+hermes -p white plugins enable white-gate
+hermes -p white plugins enable white-core
 ```
 
-Say **"run founder-onboarding"**. White reads your public writing, drafts your voice and company profile for you to correct, proposes its charter and authority, audits your week, and schedules itself.
+> On Windows, `hermes` below means `.\hermes-agent\.hermes\bin\hermes.exe`.
 
-**macOS / Linux:** install Hermes from its repo, then `hermes profile install ./white` and `hermes -p white plugins enable white-gate white-core`.
+### 3. Give White a brain
+
+```bash
+hermes -p white model
+```
+
+Pick a provider and paste your key **in that terminal window**, never in a chat. Free Gemini works for trying White; a stronger model makes its judgment much better.
+
+### 4. First conversation
+
+```bash
+hermes -p white chat
+```
+
+Say **"run founder-onboarding"**. White will:
+
+1. read your website, LinkedIn and writing, and draft your **voice** and **company** profile for you to correct;
+2. propose its **charter**: 2–3 outcomes it owns, with targets;
+3. propose its **authority**: what it may do alone and what needs your OK (default: nothing goes out without you);
+4. audit your week and propose what to take off your plate;
+5. set up its own schedule: a cycle every 2 hours, an 08:30 check-in and a Monday review.
+
+### 5. Check-ins on WhatsApp
+
+```bash
+hermes -p white whatsapp        # choose 2 (self-chat), scan the QR from WhatsApp → Linked devices
+hermes gateway install           # one gateway for all profiles; starts on login (Windows asks for admin once)
+```
+
+Message yourself on WhatsApp. The first time, White replies with a pairing code. Approve yourself with the command it shows (`hermes -p white pairing approve whatsapp <CODE>`), then send **`/sethome`** so check-ins land there.
+
+> The WhatsApp bridge is unofficial (it works like WhatsApp Web), so there's a small account risk. Self-chat, or a dedicated number, keeps it low.
+
+### 6. Connect your apps (recommended)
+
+Without your email and calendar, White can't see your real work. Add a [Composio](https://composio.dev) Platform key to the profile's `.env`, then:
+
+```bash
+hermes -p white white composio-setup
+```
+
+White connects Gmail, Calendar, LinkedIn, Slack, Notion and more **one at a time, when a task needs them**, through links you approve. Reads are free; sends always come to you first.
+
+### 7. Check everything
+
+```bash
+hermes -p white white doctor
+```
+
+Every problem comes with the exact fix. Also useful: `white judge` (what matters today), `white wiki` (your readable world model), `white receipts` (a shareable, redacted log).
 
 ### Bring your own keys
 
-Everything is optional except a model. Keys go in the White profile's `.env` (on Windows, `%LOCALAPPDATA%\hermes\profiles\white\.env`), never in a chat.
+Only a model is required. Keys go in the White profile's `.env` (Windows: `%LOCALAPPDATA%\hermes\profiles\white\.env`; macOS/Linux: `~/.hermes/profiles/white/.env`).
 
-| For | Add to `.env` | Then run |
+| For | Add to `.env` | Then |
 |---|---|---|
-| **A model** (any Hermes provider) | e.g. `GOOGLE_API_KEY`, `OPENROUTER_API_KEY` | `hermes -p white model` |
-| **Your apps** via Composio | `COMPOSIO_API_KEY=ak_…` | `hermes -p white white composio-setup` |
-| **WhatsApp check-ins** | none | `hermes -p white whatsapp` → `hermes gateway install` |
-| White's **own inbox** | `AGENTMAIL_API_KEY` | say "run white-identity" |
-| White's **own phone** (US/CA) | `AGENTPHONE_API_KEY` | `hermes -p white white phone-setup` |
+| A model | e.g. `GOOGLE_API_KEY`, `OPENROUTER_API_KEY` | `hermes -p white model` |
+| Your apps (Composio) | `COMPOSIO_API_KEY=ak_…` | `hermes -p white white composio-setup` |
+| White's own inbox (AgentMail) | `AGENTMAIL_API_KEY` | say "run white-identity" |
+| White's own phone (AgentPhone, US/CA) | `AGENTPHONE_API_KEY` | `hermes -p white white phone-setup` |
 
-Useful anytime: `white doctor` (health), `white judge` (what matters today), `white wiki` (readable world model), `white receipts`.
+### Updating
+
+```bash
+cd white && git pull
+hermes profile update white --yes
+```
+
+Your founder files, world model, keys and WhatsApp pairing are kept.
+
+### Troubleshooting
+
+| Problem | Fix |
+|---|---|
+| `Profile 'white' does not get a gateway of its own` | Run `hermes gateway` / `hermes gateway install` **without** `-p white`. One gateway serves every profile. |
+| WhatsApp says "couldn't link, check your connection" | Turn off phone VPN or data saver, scan the newest QR (it rotates every ~20 s), wait 2–3 minutes between tries. |
+| White doesn't reply on WhatsApp | Approve the pairing code it sent you, and make sure the gateway is running (`hermes gateway status`). |
+| Replies are labelled "Hermes Agent" | `powershell -File .\white\scripts\set-whatsapp-name.ps1`, then restart the gateway. |
+| Rate-limit errors | Free model tiers throttle long sessions. Wait, or use a paid or credit-backed key. |
+| Anything else | `hermes -p white white doctor` |
 
 ## Your data stays yours
 
