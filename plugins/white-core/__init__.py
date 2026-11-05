@@ -26,6 +26,8 @@ import white_receipts as receipts  # noqa: E402
 from white_inbox import Inbox, load_folders  # noqa: E402
 from white_intent import Intents, IntentError  # noqa: E402
 import white_desktop as desktop  # noqa: E402
+import white_scout as scout  # noqa: E402
+from white_mastery import Mastery  # noqa: E402
 
 _ctx = None  # set in register(); gives the supervisor its own LLM call via ctx.llm
 
@@ -312,7 +314,81 @@ def white_desktop(args: dict | None = None, **_: Any) -> str:
     return _ok(out) if out.get("ok") else _err(json.dumps(out.get("error"), ensure_ascii=False))
 
 
+def white_scout(args: dict | None = None, **_: Any) -> str:
+    """Know what the founder owns; find, inspect and install skills White needs, by itself."""
+    args = args or {}
+    home = _home()
+    try:
+        a = args.get("action", "scan")
+        if a == "scan":
+            return _ok(scout.scan(home))
+        if a == "search":
+            return _ok(scout.search(str(args.get("need", ""))))
+        if a == "fetch":
+            q = scout.fetch_repo(home, str(args.get("repo", "")))
+            return _ok({"quarantine": str(q), "inspection": scout.inspect(q)})
+        if a == "install":
+            q = home / "white" / "quarantine" / scout._safe_name(str(args.get("repo", "")).replace("/", "__"))
+            if not q.exists():
+                return _err("fetch the repo first")
+            res = scout.install(home, q, str(args.get("why", "")), list(args.get("only") or []) or None)
+            if res.get("installed"):
+                get_world().log_action(f"Installed skill(s) {', '.join(res['installed'])} from {args.get('repo')}",
+                                       "done", proof=str(home / "white" / "scout.json"))
+            return _ok(res)
+        if a == "list":
+            return _ok(scout.registry(home))
+        return _err("action must be scan, search, fetch, install or list")
+    except Exception as e:  # network errors, bad archives, rule failures: report, never crash the loop
+        return _err(str(e))
+
+
+def white_mastery(args: dict | None = None, **_: Any) -> str:
+    """Expert playbooks per tool: learn its features, record use, score how much of it White uses."""
+    args = args or {}
+    try:
+        m = Mastery(_home())
+        a = args.get("action", "report")
+        if a == "learn":
+            return _ok(m.learn(str(args.get("tool", "")), list(args.get("features") or []),
+                               str(args.get("how_to_drive", ""))))
+        if a == "use":
+            return _ok(m.use(str(args.get("tool", "")), str(args.get("feature", "")),
+                             str(args.get("outcome", "")), str(args.get("lesson", ""))))
+        if a == "pack":
+            return _ok(m.load(str(args.get("tool", ""))))
+        if a == "report":
+            return _ok(m.report())
+        return _err("action must be learn, use, pack or report")
+    except ValueError as e:
+        return _err(str(e))
+
+
 _TOOLS = {
+    "white_scout": (
+        white_scout,
+        "Capabilities. action=scan: what the founder already has (CLIs, skills, connected apps, model "
+        "providers). action=search (need): GitHub skill repos with >=1000 stars, licensed, active. "
+        "action=fetch (repo owner/name): download to quarantine and inspect the code. action=install (repo, "
+        "why, only=[skill names]): installs only if inspection passes; blocked findings are returned. "
+        "action=list: installed scouted skills. Use when a task needs a skill you don't have; no need to ask "
+        "the founder unless inspection blocks it.",
+        {"action": {"type": "string"}, "need": {"type": "string"}, "repo": {"type": "string"},
+         "why": {"type": "string"}, "only": {"type": "array", "items": {"type": "string"}}},
+        ["action"],
+    ),
+    "white_mastery": (
+        white_mastery,
+        "Tool mastery packs: get 100% out of any tool. action=learn (tool, features=[{name, what, goal, "
+        "source}], how_to_drive): record features from docs/changelogs/expert guides, each mapped to a founder "
+        "goal ('' if none) and with a source. action=use (tool, feature, outcome, lesson): log a use and what "
+        "worked. action=pack (tool): the playbook. action=report: every tool's usage %, lowest first, with "
+        "unused features that fit the founder's goals.",
+        {"action": {"type": "string"}, "tool": {"type": "string"},
+         "features": {"type": "array", "items": {"type": "object"}}, "how_to_drive": {"type": "string"},
+         "feature": {"type": "string"}, "outcome": {"type": "string"}, "lesson": {"type": "string"}},
+        ["action"],
+    ),
     "white_desktop": (
         white_desktop,
         "Use any desktop app (Windows/macOS/Linux) through its accessibility tree: cheaper and more reliable "

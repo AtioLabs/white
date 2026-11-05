@@ -20,3 +20,5 @@ provides_tools:
   - white_inbox
   - white_intent
   - white_desktop
+  - white_scout
+  - white_mastery
