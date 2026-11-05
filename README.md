@@ -150,7 +150,7 @@ Read [SECURITY.md](SECURITY.md) for the known limits.
 
 1. **Paste one line.** Windows: open **PowerShell** and paste the Windows line from [Quickstart](#quickstart). Mac/Linux: open **Terminal** and paste the other one.
 2. **Wait while it installs.** It installs Hermes and its desktop app (first time only), then White, then switches on White's safety gate.
-3. **Pick a model.** It asks which AI to use. A free [Google Gemini key](https://aistudio.google.com) is fine to start. Paste the key **only in that window**, never in a chat.
+3. **Pick a model.** Already pay for **ChatGPT, Codex or SuperGrok**? Choose it and log in, with no API key and no extra bill. Otherwise use any API key (see [Use the AI you already pay for](#use-the-ai-you-already-pay-for)). Keys go **only in that window**, never in a chat.
 4. **Say hi.** The Hermes app opens. Choose **white** in the sidebar and say *hi*.
 
 From there **White sets itself up with you**, one step at a time:
@@ -164,13 +164,27 @@ From there **White sets itself up with you**, one step at a time:
 
 Run the same line again anytime to update White. Your data, keys and WhatsApp stay as they are.
 
+### Use the AI you already pay for
+
+White runs on any model Hermes supports, including **the subscription you already have**. Pick it in the model step, or later in the Hermes app's settings.
+
+| You have | How White uses it |
+|---|---|
+| **ChatGPT / Codex** plan | Log in with ChatGPT, no API key |
+| **SuperGrok / X Premium+** | Log in with xAI, no API key (some tiers are blocked by xAI) |
+| **GitHub Copilot, Qwen, MiniMax, Nous Portal** | Log in, no API key |
+| **Claude Max** | Log in. Uses your purchased *extra usage* credits, not the base plan |
+| Claude Pro, Gemini, or anything else | An API key: Anthropic, Google, OpenRouter, Sarvam or any OpenAI-compatible provider, or a local model via Ollama |
+
+Free tiers are fine for a quick try but too small for a worker that runs all day. Add a backup provider (`hermes -p white fallback add`) so White switches automatically when one hits its limit.
+
 ### Bring your own keys
 
 Only a model is required. Add keys in the Hermes app's settings for the **white** profile (or its `.env` file). Never paste them into a chat.
 
 | For | Key | Get it at |
 |---|---|---|
-| A model | e.g. `GOOGLE_API_KEY`, `OPENROUTER_API_KEY` | [aistudio.google.com](https://aistudio.google.com), [openrouter.ai](https://openrouter.ai) |
+| A model (if you don't use a subscription) | e.g. `OPENROUTER_API_KEY`, `ANTHROPIC_API_KEY`, `GOOGLE_API_KEY` | [openrouter.ai](https://openrouter.ai), [console.anthropic.com](https://console.anthropic.com), [aistudio.google.com](https://aistudio.google.com) |
 | Your apps (Gmail, Calendar, LinkedIn, Slack, …) | `COMPOSIO_API_KEY` (`ak_…`) | [composio.dev](https://composio.dev) |
 | White's own inbox (optional) | `AGENTMAIL_API_KEY` | [agentmail.to](https://agentmail.to) |
 | White's own phone (optional, US/CA) | `AGENTPHONE_API_KEY` | [agentphone.ai](https://agentphone.ai) |

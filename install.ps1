@@ -78,7 +78,8 @@ $cfg = Join-Path $ProfileHome "config.yaml"
 $hasModel = (Test-Path $cfg) -and (Select-String -Path $cfg -Pattern "^\s*default:\s*\S" -Quiet)
 if (-not $hasModel) {
     Say "Step 4 of 5: pick White's AI model."
-    Write-Host "  Tip: a free Google Gemini key works to start: https://aistudio.google.com -> Get API key."
+    Write-Host "  Already pay for ChatGPT, Codex or SuperGrok? Pick it and log in - no API key needed."
+    Write-Host "  Otherwise any API key works (OpenRouter, Anthropic, Google, Sarvam, ...)."
     Write-Host "  Paste your key ONLY in this window."
     & $Hermes -p $Profile model
 } else {

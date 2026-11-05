@@ -43,7 +43,8 @@ ok "Safety gate and core are on"
 CFG="${HERMES_HOME:-$HOME/.hermes}/profiles/$PROFILE/config.yaml"
 if [ ! -f "$CFG" ] || ! grep -Eq '^\s*default:\s*\S' "$CFG"; then
   say "Step 4 of 5: pick White's AI model."
-  echo "  Tip: a free Google Gemini key works to start: https://aistudio.google.com -> Get API key."
+  echo "  Already pay for ChatGPT, Codex or SuperGrok? Pick it and log in - no API key needed."
+  echo "  Otherwise any API key works (OpenRouter, Anthropic, Google, Sarvam, ...)."
   hermes -p "$PROFILE" model </dev/tty
 else
   ok "Step 4 of 5: model already set"
