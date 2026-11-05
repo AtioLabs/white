@@ -12,5 +12,9 @@ $skills = Join-Path $ProfileHome "skills\founder"
 New-Item -ItemType Directory -Force $skills | Out-Null
 Copy-Item (Join-Path $Repo "skills\founder\*") $skills -Recurse -Force
 Write-Host "founder skills -> $skills"
+$bench = Join-Path $ProfileHome "bench"
+New-Item -ItemType Directory -Force $bench | Out-Null
+Get-ChildItem (Join-Path $Repo "bench") -File | Copy-Item -Destination $bench -Force
+Write-Host "bench -> $bench"
 New-Item -ItemType Directory -Force (Join-Path $ProfileHome "founder\inbox") | Out-Null
 Write-Host "Restart White's gateway to load it: hermes -p white gateway stop; hermes -p white gateway start"

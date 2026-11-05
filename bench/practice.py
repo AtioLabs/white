@@ -45,11 +45,21 @@ Return ONLY the full new SKILL.md, nothing else.
 {results}"""
 
 
-def skill_path(skill: str) -> Path:
-    p = REPO / "skills" / "founder" / skill / "SKILL.md"
-    if not p.is_file():
-        raise SystemExit(f"No White skill named {skill!r} at {p}")
-    return p
+def skill_path(skill: str, root: Path = REPO) -> Path:
+    for sub in ("founder", "scouted"):
+        p = root / "skills" / sub / skill / "SKILL.md"
+        if p.is_file():
+            return p
+    raise SystemExit(f"No White skill named {skill!r} under {root / 'skills'}")
+
+
+def load_scenarios(extra: Path | None) -> tuple[str, list[dict]]:
+    """Bench scenarios plus the ones White wrote from the founder's real failures."""
+    spec = yaml.safe_load((HERE / "scenarios.yaml").read_text(encoding="utf-8"))
+    scenarios = list(spec["scenarios"])
+    if extra and extra.is_file():
+        scenarios += json.loads(extra.read_text(encoding="utf-8"))
+    return spec["today"], scenarios
 
 
 def frontmatter(text: str) -> str:
@@ -101,14 +111,18 @@ def main() -> int:
     ap.add_argument("--only", action="append")
     ap.add_argument("--apply", action="store_true")
     ap.add_argument("--timeout", type=int, default=600)
+    ap.add_argument("--extra-scenarios", type=Path, help="JSON list of scenarios from real failures")
+    ap.add_argument("--target", choices=("repo", "profile"), default="repo",
+                    help="where --apply writes: the White repo, or the founder's installed profile")
+    ap.add_argument("--out", type=Path, default=HERE / "practice")
     args = ap.parse_args()
 
-    spec = yaml.safe_load((HERE / "scenarios.yaml").read_text(encoding="utf-8"))
-    today = spec["today"]
-    scenarios = [s for s in spec["scenarios"] if s.get("agent") and (not args.only or s["id"] in args.only)]
-    sp = skill_path(args.skill)
+    today, all_sc = load_scenarios(args.extra_scenarios)
+    scenarios = [s for s in all_sc if s.get("agent") and (not args.only or s["id"] in args.only)]
+    root = args.profile_dir if args.target == "profile" else REPO
+    sp = skill_path(args.skill, root)
     current = sp.read_text(encoding="utf-8")
-    rel = f"skills/founder/{args.skill}/SKILL.md"
+    rel = sp.relative_to(root).as_posix()
 
     with tempfile.TemporaryDirectory(prefix="white-practice-") as tmpdir:
         tmp = Path(tmpdir)
@@ -142,8 +156,8 @@ def main() -> int:
         else:
             cand, adopt = {"avg": None, "rows": []}, False
 
-    out = HERE / "practice"
-    out.mkdir(exist_ok=True)
+    out = args.out
+    out.mkdir(parents=True, exist_ok=True)
     stamp = datetime.now().strftime("%Y%m%d-%H%M")
     (out / f"{args.skill}-{stamp}.candidate.md").write_text(candidate, encoding="utf-8")
     report = {"skill": args.skill, "base_avg": base["avg"], "candidate_avg": cand["avg"],
@@ -155,7 +169,16 @@ def main() -> int:
     with (out / "changelog.md").open("a", encoding="utf-8") as fh:
         fh.write(line + "\n")
     if adopt and args.apply:
+        backup = out / "backups" / f"{args.skill}-{stamp}.SKILL.md"
+        backup.parent.mkdir(parents=True, exist_ok=True)
+        backup.write_text(current, encoding="utf-8")
         sp.write_text(candidate, encoding="utf-8")
+        if args.target == "profile":  # the founder sees every change White makes to itself
+            log = args.profile_dir / "founder" / "improvements.md"
+            log.parent.mkdir(parents=True, exist_ok=True)
+            with log.open("a", encoding="utf-8") as fh:
+                fh.write(f"- {stamp}: improved `{args.skill}` ({why}). Undo: white_improve action=rollback "
+                         f"skill={args.skill}\n")
     print(line)
     return 0
 

@@ -30,6 +30,7 @@ import white_scout as scout  # noqa: E402
 from white_mastery import Mastery  # noqa: E402
 import white_gaps as gaps  # noqa: E402
 import white_models as models  # noqa: E402
+import white_improve as improve  # noqa: E402
 
 _ctx = None  # set in register(); gives the supervisor its own LLM call via ctx.llm
 
@@ -394,7 +395,41 @@ def white_models(args: dict | None = None, **_: Any) -> str:
         return _err(f"model advisor failed: {e}")
 
 
+def white_improve(args: dict | None = None, **_: Any) -> str:
+    """Self-improvement gated by the bench: real failures -> scenarios -> practice -> adopt or not."""
+    args = args or {}
+    home = _home()
+    try:
+        a = args.get("action", "status")
+        if a == "failures":
+            return _ok(improve.failures(home, get_world().db, int(args.get("days") or 14)))
+        if a == "add_scenario":
+            ns = supervisor.never_share_list(home / "founder" / "authority.yaml")
+            return _ok(improve.add_scenario(home, dict(args.get("scenario") or {}), ns))
+        if a == "practice":
+            return _ok(improve.practice(home, str(args.get("skill", "")), list(args.get("only") or []) or None))
+        if a == "status":
+            return _ok(improve.status(home))
+        if a == "rollback":
+            return _ok(improve.rollback(home, str(args.get("skill", ""))))
+        return _err("action must be failures, add_scenario, practice, status or rollback")
+    except (ValueError, OSError) as e:
+        return _err(str(e))
+
+
 _TOOLS = {
+    "white_improve": (
+        white_improve,
+        "Improve yourself, safely. action=failures (days): what went wrong lately (rejected guesses and "
+        "recommendations, gate blocks, failed actions). action=add_scenario (scenario={id, title, prompt, "
+        "rubric, must_mention, seed}): turn a repeated failure into a permanent test; no real names, emails or "
+        "never-share items. action=practice (skill, only=[scenario ids]): background run that rewrites the skill "
+        "and keeps it only if the bench score rises with no safety check lost. action=status. action=rollback "
+        "(skill): restore the previous version. Only skills change; never code, the gate or authority.",
+        {"action": {"type": "string"}, "days": {"type": "integer"}, "scenario": {"type": "object"},
+         "skill": {"type": "string"}, "only": {"type": "array", "items": {"type": "string"}}},
+        ["action"],
+    ),
     "white_gaps": (
         white_gaps,
         "Growth partner: what the founder and company LACK to hit the charter. action=gather: evidence (charter "

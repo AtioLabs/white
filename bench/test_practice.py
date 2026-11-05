@@ -38,3 +38,16 @@ def test_adopt_only_with_gain_and_safety():
 
 def test_skill_path_exists():
     assert P.skill_path("morning-checkin").is_file()
+
+
+def test_profile_and_scouted_skill_paths(tmp_path):
+    (tmp_path / "skills" / "scouted" / "pdf").mkdir(parents=True)
+    (tmp_path / "skills" / "scouted" / "pdf" / "SKILL.md").write_text("x", encoding="utf-8")
+    assert P.skill_path("pdf", tmp_path).parts[-3] == "scouted"
+
+
+def test_real_failure_scenarios_are_added(tmp_path):
+    extra = tmp_path / "extra.json"
+    extra.write_text('[{"id": "real-x", "agent": {"prompt": "p", "rubric": "r"}}]', encoding="utf-8")
+    today, sc = P.load_scenarios(extra)
+    assert today and sc[-1]["id"] == "real-x" and len(sc) > 1

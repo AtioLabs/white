@@ -24,6 +24,7 @@ White reports to the founder the way a good hire does in a 1:1: what it owned, w
 
 1. Call `white_scorecard` and `white_judge`.
 2. Run `sf-intel` and keep only the 1–2 items that change next week's plan.
+2a. **Get better (self-improvement).** `white_improve` action=failures. If the same kind of failure happened 2+ times, write it as a scenario (`add_scenario`, placeholders instead of real names), then start `practice` on the skill that caused it. Next week, `status` shows whether the change was adopted; mention adopted changes in **Learned** (they're also in `founder/improvements.md`). If the founder dislikes a change, `rollback`.
 2b. **Growth partner.** `white_gaps` action=gather, then decide what the founder and company lack to hit the charter (skills, tools, people, process, numbers, focus). Write at most 5 gaps with `white_gaps` action=write, each with evidence, the fix and who owns it; do the "white" ones yourself. Add `white_mastery` action=report (lowest tool usage first) and `white_scout` action=scan (owned but unused). Monthly: `white_models` (hardware, open_models, routing). Explain one open-weight model that fits the founder's machine or needs in plain words, and propose a change to White's own models only with cost, speed and quality numbers.
 3. Write the review, at most 20 lines:
    - **Outcomes:** one line per responsibility (current/target, on track, behind, or met).
