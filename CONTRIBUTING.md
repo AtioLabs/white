@@ -5,7 +5,7 @@ White's bar is one test: **does this make White behave like a founder's office c
 ## Before you open a PR
 
 ```bash
-python -m pip install pytest pyyaml
+python -m pip install pytest pyyaml pillow
 python -m pytest plugins bench -q        # unit tests, gate, skill frontmatter, runtime compatibility
 python bench/core_bench.py               # must stay at 100%
 ```

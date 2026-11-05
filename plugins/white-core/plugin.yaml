@@ -16,3 +16,4 @@ provides_tools:
   - white_dispatch
   - white_receipts
   - white_status
+  - white_face

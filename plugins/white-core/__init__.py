@@ -192,6 +192,26 @@ def white_review(args: dict | None = None, **_: Any) -> str:
         return _err(f"review failed: {e}")
 
 
+_FACE_TRAITS = ("face", "hair", "eyes", "brows", "glasses", "nose", "mouth", "beard", "clothes")
+
+
+def white_face(args: dict | None = None, **_: Any) -> str:
+    """Make or change White's face (its avatar in the Hermes app)."""
+    import white_face as wf
+    args = args or {}
+    try:
+        traits = {k: args.get(k) for k in _FACE_TRAITS if args.get(k)}
+        if args.get("action") == "choices":
+            return _ok(wf.choices(_home(), traits=traits))
+        if args.get("action") == "options":
+            return _ok(wf.OPTIONS)
+        seed = args.get("seed")
+        return _ok(wf.make(_home(), seed=int(seed) if seed not in (None, "") else None,
+                           photo=args.get("photo"), traits=traits))
+    except (ValueError, OSError) as e:
+        return _err(str(e))
+
+
 def white_status(args: dict | None = None, **_: Any) -> str:
     """White's own setup health (the doctor), for guiding the founder in chat. Never contains secrets."""
     try:
@@ -222,6 +242,17 @@ def white_dispatch(args: dict | None = None, **_: Any) -> str:
 
 
 _TOOLS = {
+    "white_face": (
+        white_face,
+        "White's face: a 1-bit pixel portrait used as its avatar in the Hermes app. action=choices shows a sheet "
+        "of 12 faces to pick from (by seed); action=make (default) sets one by seed and/or traits, or from a photo "
+        "the founder provides (processed locally, never uploaded); action=options lists traits. Tweaking a trait "
+        "keeps the rest of the current face.",
+        {"action": {"type": "string", "enum": ["make", "choices", "options"]},
+         "seed": {"type": "integer"}, "photo": {"type": "string", "description": "Local image path."},
+         **{k: {"type": "string"} for k in _FACE_TRAITS}},
+        [],
+    ),
     "white_status": (
         white_status,
         "White's setup health: what's ready and what's missing (model, plugins, founder files, charter, "
@@ -360,6 +391,13 @@ def _cli_setup(parser) -> None:
     sub.add_parser("judge", help="Print what White thinks matters most today")
     cp = sub.add_parser("composio-setup", help="Connect Composio (Platform ak_ key in .env) via an MCP session")
     cp.add_argument("--user-id", default="founder")
+    fp = sub.add_parser("face", help="Make White's face: --choices, --seed N, --photo PATH, or traits like --hair curly")
+    fp.add_argument("--choices", action="store_true", help="Show 12 faces to pick from")
+    fp.add_argument("--options", action="store_true", help="List every trait and its values")
+    fp.add_argument("--seed", type=int)
+    fp.add_argument("--photo")
+    for t in _FACE_TRAITS:
+        fp.add_argument(f"--{t}")
     sub.add_parser("phone-setup", help="Connect AgentPhone (AGENTPHONE_API_KEY in .env) via its hosted MCP")
     rp = sub.add_parser("receipts", help="Write a public, redacted, verifiable log of what White did")
     rp.add_argument("--days", type=int, default=7)
@@ -383,6 +421,31 @@ def _cli_handler(args) -> int:
             return 1
         print(f"✓ Composio session {out['session_id']} written to config.yaml (key kept in .env only).")
         print(f"  Backup: {out['config_backup']}\n  {out['next']}")
+        return 0
+    if cmd == "face":
+        action = "choices" if getattr(args, "choices", False) else ("options" if getattr(args, "options", False) else "make")
+        payload = {"action": action, "seed": getattr(args, "seed", None), "photo": getattr(args, "photo", None),
+                   **{t: getattr(args, t, None) for t in _FACE_TRAITS}}
+        out = json.loads(white_face(payload))
+        if not out["ok"]:
+            print(f"✗ {out['error']}")
+            return 1
+        r = out["result"]
+        if action == "choices":
+            print(f"Opened 12 faces: {r['sheet']}\nPick one:  hermes -p white white face --seed <number>")
+            try:
+                import os
+                os.startfile(r["sheet"])  # Windows: show the sheet
+            except Exception:
+                pass
+        elif action == "options":
+            for k, v in r.items():
+                print(f"  --{k:<8} {' | '.join(v)}")
+        else:
+            print(f"✓ White's face is set ({r['source']}). It shows in the Hermes app: {r['avatar']}")
+            if r.get("face"):
+                f = r["face"]
+                print("  " + ", ".join(f"{k}={f[k]}" for k in _FACE_TRAITS) + f", seed={f['seed']}")
         return 0
     if cmd == "phone-setup":
         import white_composio

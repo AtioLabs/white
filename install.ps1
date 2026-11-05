@@ -67,7 +67,7 @@ $utf8NoBom = New-Object System.Text.UTF8Encoding($false)
 $envText = ""
 if (Test-Path $envPath) { $envText = [System.IO.File]::ReadAllText($envPath, $utf8NoBom).TrimStart([char]0xFEFF) }
 if ($envText -notmatch "(?m)^WHATSAPP_REPLY_PREFIX=") {
-    $line = 'WHATSAPP_REPLY_PREFIX="' + [string][char]0x25C7 + ' *White*\n' + (([string][char]0x2500) * 12) + '\n"'
+    $line = 'WHATSAPP_REPLY_PREFIX="*White*\n' + (([string][char]0x2500) * 12) + '\n"'
     $sep = if ($envText -and -not $envText.EndsWith("`n")) { "`n" } else { "" }
     [System.IO.File]::WriteAllText($envPath, $envText + $sep + $line + "`n", $utf8NoBom)
 }

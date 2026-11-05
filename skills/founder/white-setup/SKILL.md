@@ -32,6 +32,7 @@ Most founders aren't developers. After the one-line install, White finishes its 
    - **Apps (Gmail, Calendar, LinkedIn):** explain why in one sentence ("so I can see your real week"). Ask the founder to create a free Composio account, copy the key starting with `ak_`, and add it in the Hermes app under **Settings → Keys/Environment** as `COMPOSIO_API_KEY`, never pasted into the chat. Then the founder runs one line, `hermes -p white white composio-setup`, and you connect apps one at a time with `white-connect` when a task needs them.
    - **WhatsApp:** explain that White's check-ins arrive there. In the Hermes app go to **Messaging → WhatsApp**, follow its QR step, choose *self-chat*, then approve the pairing request in the same Messaging page. After the first message, the founder sends `/sethome`.
    - **Schedule:** run `white-cycle` step 0 so White schedules its own check-ins.
+   - **A face (optional, fun, last):** `white_face` with action `choices` shows 12 pixel faces; the founder picks a seed, tweaks traits ("add glasses"), or turns their own photo into one (processed on their machine, never uploaded). It appears as White's avatar in the Hermes app.
 5. **Keys, the one hard rule:** never ask for, accept, or repeat a key in chat. If the founder pastes one, tell them to delete that message and rotate the key, and don't use it.
 6. **Finish** with one line: "You're set. Here's today's one thing: …", from `white_judge`.
 

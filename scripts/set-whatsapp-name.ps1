@@ -3,9 +3,8 @@
 # Writes UTF-8 WITHOUT a BOM: a BOM would corrupt the first key name in .env.
 param([string]$Profile = "white", [string]$Name = "White")
 $ProfileEnv = Join-Path $env:LOCALAPPDATA "hermes\profiles\$Profile\.env"
-$diamond = [string][char]0x25C7
 $rule = ([string][char]0x2500) * 12
-$prefix = 'WHATSAPP_REPLY_PREFIX="' + $diamond + ' *' + $Name + '*\n' + $rule + '\n"'
+$prefix = 'WHATSAPP_REPLY_PREFIX="*' + $Name + '*\n' + $rule + '\n"'
 $utf8NoBom = New-Object System.Text.UTF8Encoding($false)
 $text = ""
 if (Test-Path $ProfileEnv) { $text = [System.IO.File]::ReadAllText($ProfileEnv, $utf8NoBom).TrimStart([char]0xFEFF) }

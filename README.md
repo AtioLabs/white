@@ -236,7 +236,7 @@ Nothing about you lives in this repo. Your voice, company, charter, authority ru
 One bar for every change: **does it make White more of a colleague, or more of a tool?** Read [CONTRIBUTING.md](CONTRIBUTING.md) and [DESIGN.md](DESIGN.md).
 
 ```bash
-python -m pip install pytest pyyaml
+python -m pip install pytest pyyaml pillow
 python -m pytest plugins bench -q && python bench/core_bench.py
 ```
 
