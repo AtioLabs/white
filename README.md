@@ -13,7 +13,7 @@
 [![Built on Hermes Agent](https://img.shields.io/badge/built%20on-Hermes%20Agent-gold)](https://github.com/NousResearch/hermes-agent)
 [![Any model](https://img.shields.io/badge/model-bring%20your%20own-blue)](#bring-your-own-keys)
 
-[Quickstart](#quickstart) · [Why](#why-white) · [A day with White](#a-day-with-white) · [Faces](#every-white-has-its-own-face) · [What it does](#what-white-does) · [White to White](#white-to-white) · [How it works](#how-it-works) · [Safety](#safe-by-construction) · [Install](#install) · [Status](#status)
+[Quickstart](#quickstart) · [Why](#why-white) · [A day with White](#a-day-with-white) · [Faces](#every-white-has-its-own-face) · [What it does](#what-white-does) · [White 2.0](#white-20-a-colleague-you-dont-have-to-prompt) · [White to White](#white-to-white) · [How it works](#how-it-works) · [Safety](#safe-by-construction) · [Install](#install) · [Status](#status)
 
 </div>
 
@@ -97,7 +97,24 @@ Nine traits (face shape, hair, eyes, brows, glasses, nose, mouth, beard, clothes
 | **"Don't let SF leave us behind"** | A weekly brief: what shipped and what changed, with *so what for us* and one action |
 | **Nothing at all** | Audits your week, shows what it can take off your plate ranked by hours saved, and asks which to start with |
 
-16 founder's-office skills ship with White: onboarding, the work loop, daily check-ins, weekly reviews, design partners, investors, seed model, investor updates, accelerators, distribution, SF intel, inbox and calendar, identity, app connections, and the White network.
+19 founder's-office skills ship with White: setup, onboarding, the work loop, daily check-ins, weekly reviews, outcomes, design partners, investors, seed model, investor updates, accelerators, distribution, SF intel, inbox and calendar, identity, app connections, the White network, computer use, and capabilities.
+
+## White 2.0: a colleague you don't have to prompt
+
+Most agents still need you to know what to ask. White 2.0 removes that.
+
+| You | White 2.0 |
+|---|---|
+| **Drop anything in the `White Inbox` folder** on your Desktop (or a Google Drive folder, from your phone) | Reads it, files the people, deals, promises and numbers into memory with their source, does the work it implies, and moves it to `Filed/` |
+| **Just work** | Infers what you're trying to do from what it sees (an essay + two investor emails = "preparing a fundraise story"). No risk: it acts. Risky: it prepares and asks one question. Unsure: it waits. Nothing adds up: it stays quiet |
+| **Own tools you barely use** | Learns each tool from its live docs and keeps a mastery pack: which features serve your goals, and "you use 20% of this, here's what I'll run for you" |
+| **Don't know what skills exist** | Finds skills on GitHub itself (1,000+ stars only), inspects the code for credential theft, hidden code and install hooks, then installs and uses them. Blocked ones are explained |
+| **Use desktop apps** | Drives any app through its accessibility tree ([agent-desktop](https://github.com/vercel-labs/agent-desktop)): cheaper and more exact than screenshots. Send/pay/post clicks still need your OK |
+| **Don't know what you're missing** | A weekly gap report: what you and the company lack to hit your goals, with evidence, the fix and who owns it |
+| **Hear about open models but don't know which** | Reads your hardware and live Hugging Face trends, and tells you in plain words which open-weight model fits your machine and needs |
+| **Want it to get better** | Turns its real failures into permanent tests, rewrites the skill that failed, and keeps the change only if its bench score rises with no safety check lost. Every change is logged in `founder/improvements.md` with one-command undo |
+
+The design and the research behind it are in [docs/WHITE-2.0-PROPOSAL.md](docs/WHITE-2.0-PROPOSAL.md).
 
 ## White to White
 
@@ -143,7 +160,12 @@ White is a **worker runtime**, not a prompt pack. Skills are its training; the j
 | **Supervisor** | Code checks (leaks, words you never use, AI tells, length, sources, proof), then a separate model review | You see work that's already been checked |
 | **Learning** | Your edits become voice lessons, your accept/reject choices tune its priorities within bounds, and a weekly scorecard reports misses | It gets better at *your* job, the way a hire does |
 | **Specialists** | Outreach, research, content, finance and ops workers on Hermes kanban, each with role rules | White orchestrates; work runs in parallel |
-| **Practice runs** | White proposes edits to its own skills and keeps one only if the bench score rises with no safety check lost | Improves the harness, not the model (after Google Research's Harness²) |
+| **Inbox** | `white_inbox`: a Desktop folder plus Drive folders; each file is hashed, read, recorded with its source and filed | Context grows with you, without typing |
+| **Intent engine** | `white_intent`: guesses must cite real signals; one signal never acts alone; one policy decides act / ask / wait; your feedback tunes which signals it trusts | Works without prompts, but never on a hunch |
+| **Capabilities** | `white_scout` (find, inspect, install skills) and `white_mastery` (per-tool playbooks with usage %) | Expert use of tools you didn't know you had |
+| **Computer use** | `white_desktop` over agent-desktop; refs are resolved to real element names so the gate sees what's clicked | Any app, no screenshots, still gated |
+| **Growth partner** | `white_gaps` (what's missing, with evidence) and `white_models` (hardware + live open-weight models) | Shows you what you lack, not just what you asked |
+| **Practice runs** | `white_improve`: real failures become bench scenarios; White rewrites a skill and keeps it only if the bench score rises with no safety check lost, with backups and undo | Improves the harness, not the model (after Google Research's Harness²) |
 | **Receipts** | `white receipts`: a public, redacted log with SHA-256 proof fingerprints | Build in public with proof anyone can verify |
 
 ## Safe by construction
@@ -151,7 +173,9 @@ White is a **worker runtime**, not a prompt pack. Skills are its training; the j
 White acts in your name, so its limits are **code, not prompts**:
 
 - **The authority gate** sits in front of every tool call. Messages, email, posts, form submits, payments, calls, SMS, agent-to-agent messages, and Composio actions hidden inside router arguments (e.g. `GMAIL_SEND_EMAIL`) all need your approval, unless you granted a narrow standing permission. Anything on your never-share list is blocked outright. If the gate fails, it fails closed.
-- **Unattended runs can't approve anything.** Scheduled cycles prepare drafts; you approve.
+- **Unattended runs can't approve anything.** Scheduled cycles prepare drafts; you approve. If Hermes is in auto-approve mode (one-shot runs, `/yolo`, approvals off), the gate turns every "ask the founder" into a block.
+- **White can't rewrite itself.** Changes to its own code, `authority.yaml`, `config.yaml`, `SOUL.md` or `.env` need your OK, and skill edits only happen through the bench-tested practice loop.
+- **Spend limits.** Each run stops at 60 model calls or 15 minutes, so a stuck loop can't drain your credit.
 - **Keys never leave `.env`.** Config references them as `${NAME}`, and the setup commands refuse to write raw keys.
 - **It always says it's an AI** when it emails or calls as itself.
 
@@ -240,7 +264,7 @@ Nothing about you lives in this repo. Your voice, company, charter, authority ru
 
 ## Status
 
-**Early, and honest about it.** The core is built and tested, and White runs end to end on the author's machine with WhatsApp check-ins and Composio. It hasn't yet proven itself across many founders' real weeks. That's the next milestone, and the numbers will be published as receipts, not counters.
+**Early, and honest about it.** The core and White 2.0 are built and tested (167 tests), and White runs end to end on the author's machine with WhatsApp check-ins, Composio, the inbox, intent, desktop control and the skill scout. Live testing found and fixed real problems (self-edits, auto-approval in one-shot runs, runaway loops). It hasn't yet proven itself across many founders' real weeks. That's the next milestone, and the numbers will be published as receipts, not counters.
 
 **Next up:** agent-bench results against plain Hermes · the public White network directory · an official WhatsApp Business API path · macOS/Linux one-command setup.
 
