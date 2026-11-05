@@ -79,6 +79,10 @@ def run(home: Path) -> list[dict]:
     add("scheduled runs can't auto-approve", cron_mode == "deny", f"approvals.cron_mode = {cron_mode}",
         "Set approvals.cron_mode: deny in config.yaml so scheduled runs can't send without you.")
 
+    import shutil as _sh
+    add("agent-desktop installed (computer use)", bool(_sh.which("agent-desktop")), "",
+        "Run once: npm install -g agent-desktop", level="warn")
+
     # Skills and soul
     for s in SKILLS_REQUIRED:
         found = any((home / "skills").rglob(f"{s}/SKILL.md")) if (home / "skills").is_dir() else False

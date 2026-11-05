@@ -132,3 +132,23 @@ def test_policy_file_loads(tmp_path):
     auth = load_authority(p)
     assert decide("a2a_call", {"m": "hello"}, auth).action == "allow"
     assert decide("a2a_call", {"m": "about Secret Customer"}, auth).action == "block"
+
+
+def test_desktop_send_click_needs_approval():
+    d = decide("white_desktop", {"command": "click", "ref": "@s1:e8", "label": "Send"}, EMPTY)
+    assert d.action == "approve"
+
+
+def test_desktop_read_and_safe_click_pass():
+    assert decide("white_desktop", {"command": "snapshot", "args": ["--app", "Notepad"]}, EMPTY).action == "allow"
+    assert decide("white_desktop", {"command": "click", "ref": "@s1:e3", "label": "File"}, EMPTY).action == "allow"
+
+
+def test_desktop_enter_needs_approval():
+    d = decide("white_desktop", {"command": "press", "args": ["Enter"], "label": "new line"}, EMPTY)
+    assert d.action == "approve"
+
+
+def test_raw_agent_desktop_action_in_shell_needs_approval():
+    assert decide("terminal", {"command": "agent-desktop click @s1:e8"}, EMPTY).action == "approve"
+    assert decide("terminal", {"command": "agent-desktop snapshot --app Slack -i"}, EMPTY).action == "allow"

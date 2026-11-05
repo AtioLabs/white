@@ -25,6 +25,7 @@ import white_team as team  # noqa: E402
 import white_receipts as receipts  # noqa: E402
 from white_inbox import Inbox, load_folders  # noqa: E402
 from white_intent import Intents, IntentError  # noqa: E402
+import white_desktop as desktop  # noqa: E402
 
 _ctx = None  # set in register(); gives the supervisor its own LLM call via ctx.llm
 
@@ -303,7 +304,28 @@ def white_intent(args: dict | None = None, **_: Any) -> str:
         return _err(str(e))
 
 
+def white_desktop(args: dict | None = None, **_: Any) -> str:
+    """Drive any desktop app through its accessibility tree (agent-desktop), gate-visible."""
+    args = args or {}
+    out = desktop.run(str(args.get("command", "")), list(args.get("args") or []),
+                      str(args.get("ref", "")), str(args.get("label", "")))
+    return _ok(out) if out.get("ok") else _err(json.dumps(out.get("error"), ensure_ascii=False))
+
+
 _TOOLS = {
+    "white_desktop": (
+        white_desktop,
+        "Use any desktop app (Windows/macOS/Linux) through its accessibility tree: cheaper and more reliable "
+        "than screenshots. Flow: command=snapshot args=['--app','<App>','-i','--compact'] -> read refs "
+        "(@sXXXX:eN with role and name) -> act: command=click|set-value|type|select|toggle|scroll ref=<ref> "
+        "label=<the element's real name> args=[value...]. press: args=['Enter'] with label = what it does. "
+        "launch/close-app/focus-window: args=['<App>']. Always snapshot again after acting to verify. "
+        "Send/pay/post/delete-type targets go to the founder for approval. Use screenshots only if an app "
+        "exposes no tree.",
+        {"command": {"type": "string"}, "args": {"type": "array", "items": {"type": "string"}},
+         "ref": {"type": "string"}, "label": {"type": "string"}},
+        ["command"],
+    ),
     "white_intent": (
         white_intent,
         "Work out what the founder is trying to do without being asked. action=context: recent signals, open "

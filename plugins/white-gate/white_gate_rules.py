@@ -44,6 +44,10 @@ OUTWARD_CLICK_WORDS = re.compile(
     re.IGNORECASE,
 )
 SCREEN_TOOLS = frozenset({"browser_exec", "browser_cdp", "browser_dialog", "computer_use"})
+DESKTOP_SEND_KEYS = re.compile(r"\b(enter|return)\b", re.IGNORECASE)
+DESKTOP_RAW_ACT = re.compile(
+    r"\bagent-desktop\b.*\b(click|double-click|right-click|type|set-value|press|select|toggle|check|"
+    r"mouse-click|drag|batch)\b", re.IGNORECASE | re.DOTALL)
 
 # MCP tools are usually named mcp_<server>_<tool>; these verbs mean outward.
 OUTWARD_MCP_VERBS = re.compile(
@@ -140,6 +144,17 @@ def is_outward(tool_name: str, args: Any, authority: Authority) -> Optional[str]
         return f"'{tool_name}' command sends something outside"
     if tool_name in SCREEN_TOOLS and OUTWARD_CLICK_WORDS.search(text):
         return f"'{tool_name}' action looks like send/submit/pay"
+    if tool_name == "white_desktop" and isinstance(args, dict):
+        # white-core resolves refs to the element's real name and refuses a label that hides it,
+        # so the label is the trustworthy description of the target.
+        label = str(args.get("label") or "")
+        cmd = str(args.get("command") or "")
+        if OUTWARD_CLICK_WORDS.search(label):
+            return f"desktop {cmd} on '{label}' looks like send/submit/pay"
+        if cmd == "press" and DESKTOP_SEND_KEYS.search(" ".join(map(str, args.get("args") or []))):
+            return "desktop key press (Enter) can send a message or submit a form"
+    if tool_name in ("terminal", "execute_code") and DESKTOP_RAW_ACT.search(text):
+        return "raw agent-desktop action: use the white_desktop tool so the target can be checked"
     if tool_name.startswith("mcp_"):
         action = _mcp_action(tool_name)
         if ARBITRARY_CODE_TOOLS.search(action):
