@@ -53,8 +53,27 @@ def get_world(home: Path | None = None) -> World:
     return _world_cache[key]
 
 
+MAX_LIST = 25     # every tool result stays in context for the rest of the run: keep them small
+MAX_STR = 1500
+
+
+def _compact(x: Any, depth: int = 0) -> Any:
+    if isinstance(x, list):
+        out = [_compact(v, depth + 1) for v in x[:MAX_LIST]]
+        if len(x) > MAX_LIST:
+            out.append(f"... {len(x) - MAX_LIST} more not shown (narrow the query)")
+        return out
+    if isinstance(x, dict):  # dropped-file text gets more room: White must be able to read it
+        return {k: (v[:6000] + f"... [{len(v) - 6000} chars cut: open the file for the rest]"
+                    if k == "text" and isinstance(v, str) and len(v) > 6000
+                    else v if k == "text" else _compact(v, depth + 1)) for k, v in x.items()}
+    if isinstance(x, str) and len(x) > MAX_STR and depth > 0:
+        return x[:MAX_STR] + f"... [{len(x) - MAX_STR} chars cut]"
+    return x
+
+
 def _ok(payload: Any) -> str:
-    return json.dumps({"ok": True, "result": payload}, ensure_ascii=False, default=str)
+    return json.dumps({"ok": True, "result": _compact(payload)}, ensure_ascii=False, default=str)
 
 
 def _err(msg: str) -> str:

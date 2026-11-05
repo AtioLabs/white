@@ -24,3 +24,17 @@ def test_skill_frontmatter(path):
 
 def test_found_all_skills():
     assert len(SKILLS) >= 14
+
+
+def test_no_text_trips_hermes_injection_scanner():
+    """Hermes drops a whole SOUL.md/skill if it matches its injection patterns (a 'never pretend
+    to be human' line once silently removed White's personality). Mirror the risky ones here."""
+    import re as _re
+    root = Path(__file__).resolve().parent.parent
+    files = [root / "SOUL.md", *sorted((root / "skills").rglob("SKILL.md"))]
+    f = r"(?:\w+\s+){0,3}"
+    pats = [rf"pretend\s+{f}(you\s+are|to\s+be)\s+", rf"you\s+are\s+{f}now\s+(?:a|an|the)\s+",
+            rf"ignore\s+{f}(previous|prior|above|all)\s+{f}instructions", rf"do\s+not\s+{f}tell\s+{f}the\s+user",
+            rf"output\s+{f}(system|initial)\s+prompt", rf"you\s+have\s+been\s+{f}(updated|upgraded|patched)\s+to"]
+    bad = [(p.name, x) for p in files for x in pats if _re.search(x, p.read_text(encoding="utf-8"), _re.I)]
+    assert not bad, bad

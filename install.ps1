@@ -76,6 +76,7 @@ Ok "Safety gate and core are on"
 & $Hermes -p $Profile config set agent.max_turns 60 2>&1 | Out-Null
 & $Hermes -p $Profile config set agent.budget_warning_ratio 0.75 2>&1 | Out-Null
 & $Hermes -p $Profile config set agent.run_budget_seconds 900 2>&1 | Out-Null
+& $Hermes -p $Profile config set compression.threshold_tokens 40000 2>&1 | Out-Null
 # White Inbox on the Desktop: drop anything there, White files it and does the work.
 $WhiteInbox = Join-Path ([Environment]::GetFolderPath("Desktop")) "White Inbox"
 New-Item -ItemType Directory -Force $WhiteInbox | Out-Null

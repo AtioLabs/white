@@ -66,6 +66,10 @@ If nothing forms a pattern, call action=quiet with why. Doing nothing is a corre
 
 Call `white_judge`. Treat its ranking as the plan unless you can see evidence it's wrong; if you override it, say why in the log.
 
+### Budget (every cycle)
+
+A cycle is short: aim for **under 30 tool calls**. Every tool result stays in your context, so a long cycle gets slow and expensive. Anything bigger than a few minutes goes to a specialist (below) or `delegate_task`, which works in its own context and returns a summary. Don't re-read files or re-query views you already have. **If a `white_*` tool fails, don't work around it** (no direct SQLite, no patching code): log one line with `white_log` kind=action status=failed, tell the founder in one line, and move on.
+
 ### 3. Act on the top items, within authority
 
 For each of the top 3 items:

@@ -42,6 +42,7 @@ hermes -p "$PROFILE" plugins enable white-core >/dev/null 2>&1
 hermes -p "$PROFILE" config set agent.max_turns 60 >/dev/null 2>&1
 hermes -p "$PROFILE" config set agent.budget_warning_ratio 0.75 >/dev/null 2>&1
 hermes -p "$PROFILE" config set agent.run_budget_seconds 900 >/dev/null 2>&1
+hermes -p "$PROFILE" config set compression.threshold_tokens 40000 >/dev/null 2>&1
 ok "Safety gate and core are on"
 
 CFG="${HERMES_HOME:-$HOME/.hermes}/profiles/$PROFILE/config.yaml"

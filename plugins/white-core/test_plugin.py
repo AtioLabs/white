@@ -75,3 +75,11 @@ def test_tools_survive_parallel_threads(tmp_path):
     [t.start() for t in ts]
     [t.join() for t in ts]
     assert not errors, errors[:2]
+
+
+def test_results_are_compacted_but_dropped_text_kept():
+    import json as _json
+    mod = load_plugin()
+    r = _json.loads(mod._ok({"items": list(range(100)), "note": "x" * 5000, "text": "y" * 5000}))["result"]
+    assert len(r["items"]) == 26 and "more not shown" in r["items"][-1]
+    assert len(r["note"]) < 1700 and len(r["text"]) == 5000
