@@ -24,6 +24,7 @@ import white_doctor as doctor  # noqa: E402
 import white_team as team  # noqa: E402
 import white_receipts as receipts  # noqa: E402
 from white_inbox import Inbox, load_folders  # noqa: E402
+from white_intent import Intents, IntentError  # noqa: E402
 
 _ctx = None  # set in register(); gives the supervisor its own LLM call via ctx.llm
 
@@ -276,7 +277,46 @@ def white_inbox(args: dict | None = None, **_: Any) -> str:
         return _err(str(e))
 
 
+def white_intent(args: dict | None = None, **_: Any) -> str:
+    """Infer what the founder is trying to do, and decide act / ask / wait by one policy."""
+    args = args or {}
+    try:
+        it = Intents(get_world().db)
+        a = args.get("action", "context")
+        if a == "context":
+            return _ok(it.context(int(args.get("limit") or 30)))
+        if a == "propose":
+            return _ok(it.propose(str(args.get("what", "")), list(args.get("evidence") or []),
+                                  float(args.get("confidence") or 0), str(args.get("risk", "")),
+                                  str(args.get("next_step", ""))))
+        if a == "quiet":
+            return _ok({"id": it.quiet(str(args.get("why", "")))})
+        if a == "feedback":
+            return _ok(it.feedback(int(args.get("id") or 0), str(args.get("verdict", ""))))
+        if a == "close":
+            it.close(int(args.get("id") or 0), str(args.get("status") or "done"))
+            return _ok({"id": args.get("id")})
+        if a == "list":
+            return _ok(it.list(args.get("status")))
+        return _err("action must be context, propose, quiet, feedback, close or list")
+    except (IntentError, ValueError) as e:
+        return _err(str(e))
+
+
 _TOOLS = {
+    "white_intent": (
+        white_intent,
+        "Work out what the founder is trying to do without being asked. action=context: recent signals, open "
+        "intents, learned trust. action=propose (what, evidence=[signal ids], confidence 0-1, risk none|risky, "
+        "next_step): returns decision act|ask|wait. act = do it now; ask = prepare it and ask ONE question; "
+        "wait = do nothing yet. action=quiet (why): nothing worth doing, say so. action=feedback (id, verdict "
+        "confirmed|rejected) when the founder reacts. action=close (id, status done|expired). action=list.",
+        {"action": {"type": "string"}, "what": {"type": "string"}, "evidence": {"type": "array", "items": {"type": "integer"}},
+         "confidence": {"type": "number"}, "risk": {"type": "string"}, "next_step": {"type": "string"},
+         "why": {"type": "string"}, "id": {"type": "integer"}, "verdict": {"type": "string"},
+         "status": {"type": "string"}, "limit": {"type": "integer"}},
+        ["action"],
+    ),
     "white_inbox": (
         white_inbox,
         "The founder's inbox folder (founder/inbox plus folders in founder/inbox.yaml, e.g. Google Drive). "

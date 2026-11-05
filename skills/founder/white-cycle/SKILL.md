@@ -53,6 +53,15 @@ From each meaningful item, also update the world model:
 - deal movement: `white_record` kind=pipeline (stage, next step, due)
 - promises made in the thread by the founder or the other side: `white_log` kind=commitment (with due date)
 
+### 1b. Infer intent (no prompt needed)
+
+Call `white_intent` action=context. Ask yourself: *what is the founder trying to get done this week?* Look for patterns across signals (an essay dropped + two investor emails = "preparing a fundraise story"), not single events. For each real pattern (max 3), call action=propose with the signal ids as evidence, your honest confidence, and risk (`risky` if the next step is outward, money, irreversible, reputation, or touches never-share). Then follow the returned decision exactly:
+- **act**: do the next step now and log it.
+- **ask**: prepare the work, then ask the founder ONE question with your recommended answer.
+- **wait**: do nothing; it stays open for more evidence.
+
+If nothing forms a pattern, call action=quiet with why. Doing nothing is a correct answer; inventing work is not. When the founder reacts to a guess, record it with action=feedback so White learns which signals to trust. Close finished intents (`close`, status done) and stale ones (status expired).
+
 ### 2. Judge
 
 Call `white_judge`. Treat its ranking as the plan unless you can see evidence it's wrong; if you override it, say why in the log.

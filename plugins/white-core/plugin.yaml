@@ -18,3 +18,4 @@ provides_tools:
   - white_status
   - white_face
   - white_inbox
+  - white_intent
