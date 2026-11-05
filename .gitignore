@@ -1,0 +1,28 @@
+# Secrets: keys live in your Hermes profile's .env, never in this repo
+.env
+.env.*
+*.env
+*.key
+
+# Founder data never belongs here (it lives in your Hermes profile)
+/founder/
+world.db
+gate-log.jsonl
+weights.yaml
+
+# Bench and practice outputs
+bench/results/
+bench/practice/
+
+# Python
+__pycache__/
+*.pyc
+.pytest_cache/
+.venv/
+
+# Editors / OS
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
+*.bak*

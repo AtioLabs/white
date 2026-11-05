@@ -1,0 +1,6 @@
+name: white-gate
+version: "0.1.0"
+description: "White's authority gate. Blocks never-share leaks and sends every outward action (messages, emails, posts, form submits, payments, A2A) to human approval unless authority.yaml grants a standing permission."
+author: "Asrul Ishath (asynarch), Hermes Agent"
+provides_hooks:
+  - pre_tool_call

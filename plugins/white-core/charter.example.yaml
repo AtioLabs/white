@@ -1,0 +1,21 @@
+# Copy to $HERMES_HOME/founder/charter.yaml. founder-onboarding proposes it for you.
+responsibilities:
+  - id: design-partners
+    outcome: "5 paying design partners"
+    target: 5
+    start: 2026-11-06
+    due: 2027-01-31
+    metric: {pipeline_kind: design_partner, stages: [signed, won]}
+
+  - id: follow-ups
+    outcome: "No promise older than its due date"
+    target: 0
+    metric: {overdue_commitments: true}
+
+  - id: seed-round
+    outcome: "Seed round committed"
+    target: 1
+    start: 2026-11-06
+    due: 2027-03-31
+    fundraising: true
+    metric: {pipeline_kind: investor, stages: [committed]}

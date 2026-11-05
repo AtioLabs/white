@@ -1,0 +1,17 @@
+# Copy to $HERMES_HOME/founder/authority.yaml. founder-onboarding writes it for you.
+# Anything outward that no rule below covers goes to you for approval.
+
+never_share:
+  - "burn rate"
+  - "cap table"
+  # add exact strings: unannounced customers, revenue numbers, etc.
+
+standing_permissions:
+  # Example: White may send follow-ups to people who already replied in an investor thread.
+  # - id: investor-followups
+  #   tools: ["mcp_gmail_send*", "terminal"]
+  #   args_regex: "Re: .*(seed|investment)"
+
+# Tools you want always treated as outward, or always safe.
+extra_outward_tools: []
+safe_tools: []

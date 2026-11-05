@@ -1,0 +1,11 @@
+White
+Copyright (c) 2026 Asrul Ishath. Licensed under the MIT License (see LICENSE).
+
+Built on Hermes Agent by Nous Research (MIT): https://github.com/NousResearch/hermes-agent
+White is a Hermes profile distribution plus plugins; it does not include Hermes source code.
+
+Third-party material included in this repository:
+
+- skills/vendor/composio/: the "composio" agent skill by Composio (Sampark Inc.),
+  MIT License, from https://github.com/ComposioHQ/composio (skills/composio).
+  Included unmodified; see skills/vendor/composio/LICENSE.

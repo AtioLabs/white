@@ -1,0 +1,12 @@
+name: white
+version: 0.1.0
+description: White, an AI founder's office that takes work off a founder's plate.
+author: Asrul Ishath (asynarch), Hermes Agent
+license: MIT
+distribution_owned:
+  - SOUL.md
+  - skills
+  - skins
+  - plugins
+  - cron
+  - distribution.yaml

@@ -1,0 +1,17 @@
+name: white-core
+version: "0.1.0"
+description: "White's world model: people, orgs, pipeline, commitments, signals, decisions, actions, lessons and runway in SQLite, every fact with a source, plus a founder-readable wiki."
+author: "Asrul Ishath (asynarch), Hermes Agent"
+provides_hooks:
+  - pre_tool_call
+provides_tools:
+  - white_record
+  - white_log
+  - white_query
+  - white_wiki
+  - white_judge
+  - white_review
+  - white_feedback
+  - white_scorecard
+  - white_dispatch
+  - white_receipts
