@@ -38,7 +38,7 @@ If `cronjob_manage` shows no White jobs for this profile, create them (founder's
 | `white-cycle` | every 2h, 08:00–20:00 | this skill |
 | `white-morning` | 08:30 daily | `morning-checkin` |
 | `white-weekly` | Monday 09:00 | `weekly-review` (includes `sf-intel`) |
-| `white-wiki` | 23:30 daily | `white_wiki` |
+| `white-wiki` | 23:30 daily | `white_memory` action=consolidate, then `white_wiki`; re-check the stale facts it lists when you next touch them |
 | `white-inbox` | every 5m, `monitor_script: white_inbox_watch.py` | wakes only when a new file is dropped: handle the inbox (step 1), then intent (step 1b) |
 
 Deliver to the founder's home channel. Log the setup with `white_log` (kind=action, status=done, proof = the job ids).

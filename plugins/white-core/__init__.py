@@ -32,6 +32,7 @@ from white_mastery import Mastery  # noqa: E402
 import white_gaps as gaps  # noqa: E402
 import white_models as models  # noqa: E402
 import white_improve as improve  # noqa: E402
+import white_memory as memory  # noqa: E402
 
 _ctx = None  # set in register(); gives the supervisor its own LLM call via ctx.llm
 
@@ -439,7 +440,36 @@ def white_improve(args: dict | None = None, **_: Any) -> str:
         return _err(str(e))
 
 
+def white_memory(args: dict | None = None, **_: Any) -> str:
+    """Memory that ages: what changed and when, what was true on a date, nightly cleanup."""
+    args = args or {}
+    db = get_world().db
+    try:
+        a = args.get("action", "history")
+        if a == "history":
+            return _ok(memory.history(db, str(args.get("table", "")), str(args.get("name", ""))))
+        if a == "as_of":
+            from datetime import datetime as _dt
+            when = _dt.fromisoformat(str(args.get("date", ""))).timestamp()
+            return _ok(memory.as_of(db, str(args.get("table", "")), str(args.get("name", "")), when))
+        if a == "consolidate":
+            return _ok(memory.consolidate(db))
+        return _err("action must be history, as_of or consolidate")
+    except ValueError as e:
+        return _err(str(e))
+
+
 _TOOLS = {
+    "white_memory": (
+        white_memory,
+        "Memory that ages. action=history (table people|orgs|pipeline, name): current facts plus what they "
+        "were before, with dates and sources. action=as_of (table, name, date YYYY-MM-DD): what you knew then. "
+        "action=consolidate: nightly cleanup (merge duplicates, flag stale unconfirmed facts to re-check, "
+        "archive old handled signals, expire old guesses). Nothing is deleted.",
+        {"action": {"type": "string"}, "table": {"type": "string"}, "name": {"type": "string"},
+         "date": {"type": "string"}},
+        ["action"],
+    ),
     "white_improve": (
         white_improve,
         "Improve yourself, safely. action=failures (days): what went wrong lately (rejected guesses and "

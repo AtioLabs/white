@@ -25,3 +25,4 @@ provides_tools:
   - white_gaps
   - white_models
   - white_improve
+  - white_memory

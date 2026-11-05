@@ -46,6 +46,11 @@ CREATE TABLE IF NOT EXISTS corrections (
 CREATE TABLE IF NOT EXISTS runway (
   id INTEGER PRIMARY KEY, as_of TEXT NOT NULL, cash TEXT, monthly_burn TEXT, months REAL,
   source TEXT NOT NULL, created REAL);
+CREATE TABLE IF NOT EXISTS fact_history (
+  id INTEGER PRIMARY KEY, tbl TEXT NOT NULL, entity_id INTEGER NOT NULL, field TEXT NOT NULL,
+  value TEXT, source TEXT, valid_from REAL, valid_to REAL NOT NULL);
+CREATE TABLE IF NOT EXISTS signals_archive (
+  id INTEGER PRIMARY KEY, type TEXT, summary TEXT, source TEXT, related TEXT, created REAL, archived REAL);
 """
 
 PIPELINE_KINDS = {"design_partner", "investor", "customer", "accelerator", "partner", "hire", "other"}
@@ -144,9 +149,16 @@ class World:
             raise WorldError("'name' is required")
         if table == "pipeline" and not data.get("title"):
             raise WorldError("'title' is required")
-        row = self.db.execute(f"SELECT id FROM {table} WHERE {key_sql}", key_vals).fetchone()
+        row = self.db.execute(f"SELECT * FROM {table} WHERE {key_sql}", key_vals).fetchone()
         now = _now()
         if row:
+            for k, v in data.items():  # memory that ages: keep what was true before, with when and why
+                old = row[k] if k in row.keys() else None
+                if k not in ("source", "confirmed") and old is not None and str(old) != str(v):
+                    self.db.execute(
+                        "INSERT INTO fact_history (tbl, entity_id, field, value, source, valid_from, valid_to) "
+                        "VALUES (?,?,?,?,?,?,?)",
+                        (table, row["id"], k, str(old), row["source"], row["updated"] or row["created"], now))
             sets = ", ".join(f"{k}=?" for k in data)
             self.db.execute(f"UPDATE {table} SET {sets}, updated=? WHERE id=?",
                             (*data.values(), now, row["id"]))
@@ -192,8 +204,9 @@ class World:
         """Record an event. The same source (e.g. one email id) is only ingested once, so the loop
         can re-scan the inbox safely."""
         _require_source({"source": source})
-        existing = self.db.execute("SELECT id FROM signals WHERE source=?", (source,)).fetchone()
-        if existing:
+        existing = self.db.execute("SELECT id FROM signals WHERE source=? UNION ALL "
+                                   "SELECT id FROM signals_archive WHERE source=? LIMIT 1", (source, source)).fetchone()
+        if existing:  # archived signals count as seen, so re-scans never resurrect them
             return int(existing["id"])
         cur = self.db.execute(
             "INSERT INTO signals (type, summary, source, related, created) VALUES (?,?,?,?,?)",
