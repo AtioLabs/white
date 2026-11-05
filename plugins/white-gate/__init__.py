@@ -42,6 +42,18 @@ def _approvals_bypassed() -> str:
     or `approvals.mode: off`. White's gate then fails CLOSED: anything that needs the founder is blocked."""
     if os.environ.get("HERMES_YOLO_MODE", "").strip().lower() in ("1", "true", "yes", "on"):
         return "YOLO mode is on"
+    try:  # Hermes's own answer: --yolo, gateway /yolo, and unattended (one-shot) gateway turns
+        from tools.approval import _yolo_active
+        if _yolo_active():
+            return "auto-approve is on for this run"
+    except Exception:
+        pass
+    try:
+        from tools import approval_context
+        if str(approval_context._get_approval_mode()).lower() == "off":
+            return "approvals are switched off"
+    except Exception:
+        pass
     try:
         cfg = (_home() / "config.yaml").read_text(encoding="utf-8", errors="replace")
         block = re.search(r"^approvals:\s*\n((?:[ \t]+.*\n?)+)", cfg, re.M)

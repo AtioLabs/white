@@ -201,3 +201,17 @@ def test_approvals_off_turns_approvals_into_blocks(tmp_path, monkeypatch):
     (tmp_path / "config.yaml").write_text("approvals:\n  mode: off\n  timeout: 300\n", encoding="utf-8")
     hook = _hook(tmp_path, monkeypatch)
     assert hook("send_message", {"to": "x", "text": "hi"})["action"] == "block"
+
+
+def test_hermes_unattended_turn_blocks(tmp_path, monkeypatch):
+    import sys as _sys
+    import types
+    monkeypatch.delenv("HERMES_YOLO_MODE", raising=False)
+    fake_tools = types.ModuleType("tools")
+    fake_approval = types.ModuleType("tools.approval")
+    fake_approval._yolo_active = lambda: True
+    fake_tools.approval = fake_approval
+    monkeypatch.setitem(_sys.modules, "tools", fake_tools)
+    monkeypatch.setitem(_sys.modules, "tools.approval", fake_approval)
+    hook = _hook(tmp_path, monkeypatch)
+    assert hook("send_message", {"to": "x", "text": "hi"})["action"] == "block"
