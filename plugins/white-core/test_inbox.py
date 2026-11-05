@@ -76,3 +76,20 @@ def test_binary_without_text_gets_note(setup):
     (local / "photo.jpg").write_bytes(b"\xff\xd8\xff\x00")
     item = ib.scan()[0]
     assert item["text"] == "" and "note" in item
+
+
+def test_watch_fingerprint_changes_on_drop_not_on_filing(tmp_path):
+    import importlib.util
+    spec = importlib.util.spec_from_file_location("w", Path(__file__).parent / "scripts" / "white_inbox_watch.py")
+    W = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(W)
+    local = tmp_path / "founder" / "inbox"
+    local.mkdir(parents=True)
+    before = W.fingerprint(tmp_path)
+    (local / "deck.pdf").write_bytes(b"x")
+    dropped = W.fingerprint(tmp_path)
+    assert dropped != before
+    ib = Inbox(tmp_path / "white" / "inbox.db", load_folders(tmp_path))
+    ib.file(ib.scan()[0]["sha"], "deck v3", "updated model")
+    ib.close()
+    assert W.fingerprint(tmp_path) == dropped  # filing doesn't wake White again

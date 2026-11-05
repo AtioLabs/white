@@ -63,6 +63,12 @@ mkdir -p "$(dirname "$INBOX_CFG")"
 [ -f "$INBOX_CFG" ] || echo "folders:" > "$INBOX_CFG"
 grep -qF "$WHITE_INBOX" "$INBOX_CFG" || echo "  - $WHITE_INBOX" >> "$INBOX_CFG"
 ok "White Inbox is on your Desktop"
+# Wake White when a file is dropped (cheap watcher every 5 minutes; the model runs only on a new file).
+P_HOME="${HERMES_HOME:-$HOME/.hermes}/profiles/$PROFILE"
+if [ -f "$P_HOME/plugins/white-core/scripts/white_inbox_watch.py" ]; then
+  mkdir -p "$P_HOME/scripts" && cp "$P_HOME/plugins/white-core/scripts/white_inbox_watch.py" "$P_HOME/scripts/"
+  hermes -p "$PROFILE" cron list 2>/dev/null | grep -q white-inbox || hermes -p "$PROFILE" cron create "every 5m"     "New file(s) in the White Inbox. Run white_inbox action=scan and handle each item as white-cycle step 1 says, then file it. Then white_intent action=context and propose only if a real pattern formed. Reply in at most 3 lines."     --name white-inbox --monitor-script white_inbox_watch.py --skill white-cycle >/dev/null 2>&1
+fi
 
 say "Step 5 of 5: opening the Hermes desktop app..."
 echo "  The very first launch may build the app (5-10 minutes). Progress shows below; the app opens when ready."

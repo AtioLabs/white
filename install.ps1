@@ -87,6 +87,15 @@ if (-not (Test-Path $inboxCfg) -or -not (Select-String -Path $inboxCfg -SimpleMa
     [System.IO.File]::AppendAllText($inboxCfg, "  - $WhiteInbox`n", $utf8NoBom)
 }
 Ok "White Inbox is on your Desktop"
+# Wake White when a file is dropped (a cheap watcher runs every 5 minutes; the model runs only on a new file).
+$watch = Join-Path $ProfileHome "plugins\white-core\scripts\white_inbox_watch.py"
+if (Test-Path $watch) {
+    New-Item -ItemType Directory -Force (Join-Path $ProfileHome "scripts") | Out-Null
+    Copy-Item $watch (Join-Path $ProfileHome "scripts\white_inbox_watch.py") -Force
+    if (-not ((& $Hermes -p $Profile cron list 2>&1 | Out-String) -match "white-inbox")) {
+        & $Hermes -p $Profile cron create "every 5m" "New file(s) in the White Inbox. Run white_inbox action=scan and handle each item as white-cycle step 1 says, then file it. Then white_intent action=context and propose only if a real pattern formed. Reply in at most 3 lines." --name white-inbox --monitor-script white_inbox_watch.py --skill white-cycle 2>&1 | Out-Null
+    }
+}
 
 # 4. Model
 $cfg = Join-Path $ProfileHome "config.yaml"
