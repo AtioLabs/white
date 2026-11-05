@@ -131,7 +131,7 @@ Read [SECURITY.md](SECURITY.md) for the known limits.
 
 ```powershell
 git clone https://github.com/NousResearch/hermes-agent
-git clone https://github.com/<you>/white
+git clone https://github.com/AtioLabs/white
 powershell -ExecutionPolicy Bypass -File .\white\setup-white.ps1
 ```
 
