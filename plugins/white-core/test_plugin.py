@@ -52,3 +52,26 @@ def test_hermes_home_token_expanded(tmp_path):
     out = mod._on_pre_tool_call("terminal", {"command": "type ${HERMES_HOME}\\founder\\company.md"})
     assert out["args"]["command"].startswith(f"type {home}")
     assert mod._on_pre_tool_call("read_file", {"path": "C:/x.md"}) is None
+
+
+def test_tools_survive_parallel_threads(tmp_path):
+    """Hermes runs tool calls on worker threads, sometimes at once: no SQLite thread errors."""
+    import json as _json
+    import threading
+    mod = load_plugin()
+    mod._home = lambda: tmp_path
+    mod.white_log({"kind": "signal", "data": {"type": "email", "summary": "s", "source": "gmail:1"}})
+    errors = []
+
+    def worker(i):
+        for _ in range(20):
+            r = _json.loads(mod.white_query({"view": "snapshot"}))
+            w = _json.loads(mod.white_log({"kind": "signal", "data": {"type": "t", "summary": "x",
+                                                                       "source": f"t:{i}:{_}"}}))
+            if not (r["ok"] and w["ok"]):
+                errors.append((r, w))
+
+    ts = [threading.Thread(target=worker, args=(i,)) for i in range(8)]
+    [t.start() for t in ts]
+    [t.join() for t in ts]
+    assert not errors, errors[:2]

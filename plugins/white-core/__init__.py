@@ -8,6 +8,7 @@ from __future__ import annotations
 
 import json
 import sys
+import threading
 from pathlib import Path
 from typing import Any
 
@@ -43,8 +44,10 @@ def _home() -> Path:
 
 
 def get_world(home: Path | None = None) -> World:
+    """One connection per (profile, thread): Hermes runs tool calls on worker threads, sometimes in
+    parallel, and a shared SQLite connection then fails ("thread" / recursive cursor errors)."""
     home = home or _home()
-    key = str(home)
+    key = f"{home}|{threading.get_ident()}"
     if key not in _world_cache:
         _world_cache[key] = World(home / "white" / "world.db")
     return _world_cache[key]
@@ -254,7 +257,7 @@ _inbox_cache: dict[str, Inbox] = {}
 
 def get_inbox(home: Path | None = None) -> Inbox:
     home = home or _home()
-    key = str(home)
+    key = f"{home}|{threading.get_ident()}"
     if key not in _inbox_cache:
         (home / "founder" / "inbox").mkdir(parents=True, exist_ok=True)
         _inbox_cache[key] = Inbox(home / "white" / "inbox.db", load_folders(home))

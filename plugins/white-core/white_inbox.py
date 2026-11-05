@@ -90,7 +90,8 @@ def extract_text(path: Path) -> str:
 class Inbox:
     def __init__(self, db_path: Path, folders: list[Path]):
         db_path.parent.mkdir(parents=True, exist_ok=True)
-        self.db = sqlite3.connect(str(db_path), check_same_thread=False)
+        self.db = sqlite3.connect(str(db_path), check_same_thread=False, timeout=15)
+        self.db.execute("PRAGMA journal_mode=WAL")
         self.db.row_factory = sqlite3.Row
         self.db.executescript(SCHEMA)
         self.folders = folders
