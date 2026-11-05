@@ -33,25 +33,38 @@ BINARY_EXT = {".exe", ".dll", ".so", ".dylib", ".bin", ".msi", ".pkg", ".deb", "
 TEXT_EXT = {".md", ".txt", ".py", ".js", ".mjs", ".cjs", ".ts", ".sh", ".ps1", ".json", ".yaml", ".yml",
             ".toml", ".html", ".css", ".csv", ".bash", ".zsh", ".rb", ".go", ".rs", ".sql", ".xml", ".ini", ""}
 
-# (finding, regex) -> blocks install
-BLOCK = [
-    ("reads secrets or credentials", re.compile(
-        r"(\.ssh[/\\]|id_rsa|\.aws[/\\]credentials|\.netrc|keychain|Login Data|cookies\.sqlite|"
-        r"\.hermes[/\\]\.env|auth\.json|os\.environ\b[^\n]{0,40}(KEY|TOKEN|SECRET|PASSWORD)|"
-        r"process\.env\.[A-Z_]*(KEY|TOKEN|SECRET|PASSWORD)|\$env:[A-Z_]*(KEY|TOKEN|SECRET)|"
-        r"getenv\([^)]*(KEY|TOKEN|SECRET|PASSWORD))", re.IGNORECASE)),
+# (finding, regex) -> blocks install. Applies to code AND markdown (a SKILL.md can instruct the agent).
+BLOCK_ANY = [
+    ("reads credential stores", re.compile(
+        r"(~?[/\\]\.ssh[/\\]|id_rsa|id_ed25519|\.aws[/\\]credentials|\.netrc\b|Login Data|cookies\.sqlite|"
+        r"Local State|\.hermes[/\\]+(\.env|auth\.json)|hermes[/\\]+profiles[/\\]+[^/\\\s]+[/\\]+\.env|"
+        r"\bauth\.json\b|dump-keychain|find-generic-password|"
+        r"\.git-credentials|\.docker[/\\]config\.json|\.kube[/\\]config)", re.IGNORECASE)),
+    ("dumps all environment variables", re.compile(
+        r"(JSON\.stringify\(\s*process\.env\s*\)|dict\(\s*os\.environ\s*\)|os\.environ\.copy\(\)|"
+        r"Object\.(entries|keys)\(\s*process\.env\s*\)|os\.environ\.items\(\)|Get-ChildItem\s+env:|\bprintenv\b\s*\|)",
+        re.IGNORECASE)),
     ("obfuscated execution", re.compile(
         r"(eval\s*\(\s*(atob|base64|Buffer\.from|codecs\.decode|bytes\.fromhex)|exec\s*\(\s*(base64|zlib|codecs|bytes\.fromhex|marshal)|"
         r"base64\s+(-d|--decode)\s*\|\s*(sh|bash)|FromBase64String|-EncodedCommand|"
         r"curl[^\n|]*\|\s*(sh|bash|python)|wget[^\n|]*\|\s*(sh|bash)|iex\s*\(\s*(irm|iwr|New-Object\s+Net\.WebClient))",
         re.IGNORECASE)),
+]
+# Code files only (prose may mention these legitimately).
+BLOCK_CODE = [
     ("long encoded blob", re.compile(r"[A-Za-z0-9+/]{400,}={0,2}")),
     ("persistence or system change", re.compile(
         r"(crontab\s+-|schtasks\s+/create|Register-ScheduledTask|reg\s+add\s+HK|Set-ItemProperty\s+-Path\s+HK|"
-        r"launchctl\s+load|systemctl\s+enable|\.bashrc|\.zshrc|\$PROFILE|Set-ExecutionPolicy|sudo\s)", re.IGNORECASE)),
+        r"launchctl\s+load|systemctl\s+enable|>>?\s*~?/?\.?(bashrc|zshrc|profile)\b|Add-Content\s+\$PROFILE|"
+        r"Set-ExecutionPolicy|\bsudo\s)", re.IGNORECASE)),
 ]
+# A skill reading its own service key is normal: recorded as "needs key", never blocked.
+ENV_KEY = re.compile(r"(?:process\.env\.|os\.environ(?:\.get)?\(\s*['\"]|os\.environ\[\s*['\"]|getenv\(\s*['\"]|\$env:)"
+                     r"([A-Z][A-Z0-9_]*(?:KEY|TOKEN|SECRET))")
+SKIP_DIRS = {"__pycache__", ".git", "node_modules", ".venv", "venv"}
+CODE_EXT = {".py", ".js", ".mjs", ".cjs", ".ts", ".sh", ".ps1", ".bash", ".zsh", ".rb", ".go", ".rs"}
 NETWORK = re.compile(r"(requests\.(get|post|put)|urllib\.request|httpx\.|fetch\(|axios|curl\s|wget\s|"
-                     r"Invoke-WebRequest|Invoke-RestMethod|socket\.)", re.IGNORECASE)
+                     r"Invoke-WebRequest|Invoke-RestMethod|socket\.create_connection|AF_INET)", re.IGNORECASE)
 INSTALL_HOOKS = {"setup.py", "postinstall", "preinstall", "install.sh", "install.ps1"}
 
 Fetcher = Callable[[str], bytes]
@@ -114,8 +127,6 @@ def eligible(repo: dict, now: Optional[float] = None) -> Optional[str]:
         return f"{repo.get('stargazers_count', 0)} stars < {MIN_STARS}"
     if repo.get("archived"):
         return "archived"
-    if not (repo.get("license") or {}).get("spdx_id") or (repo.get("license") or {}).get("spdx_id") == "NOASSERTION":
-        return "no clear license"
     if not _recent(str(repo.get("pushed_at") or ""), now):
         return "not updated in a year"
     return None
@@ -176,35 +187,61 @@ def fetch_repo(home: Path, repo: str, fetch: Fetcher = _http) -> Path:
 
 # ---- inspect -----------------------------------------------------------------------------------
 
-def inspect(folder: Path) -> dict:
-    """Static checks. passed=False if anything in BLOCK, a binary or an install hook is found."""
-    findings, network, skills = [], [], []
-    for p in sorted(folder.rglob("*")):
-        if not p.is_file() or p.name == ".white-meta.json":
-            continue
-        rel = str(p.relative_to(folder)).replace("\\", "/")
-        if p.name == "SKILL.md":
-            skills.append(str(p.parent.relative_to(folder)).replace("\\", "/") or ".")
-        ext = p.suffix.lower()
-        if ext in BINARY_EXT:
-            findings.append({"file": rel, "issue": "binary file"})
-            continue
-        if p.name.lower() in INSTALL_HOOKS:
-            findings.append({"file": rel, "issue": "install hook"})
-        if ext not in TEXT_EXT and not p.name.startswith("."):
-            continue  # images, fonts: data only
-        text = p.read_text(encoding="utf-8", errors="replace")
-        if p.name == "package.json" and re.search(r'"(pre|post)?install"\s*:', text):
-            findings.append({"file": rel, "issue": "npm install hook"})
-        for issue, rx in BLOCK:
-            m = rx.search(text)
-            if m:
-                findings.append({"file": rel, "issue": issue, "match": m.group(0)[:80]})
-        if NETWORK.search(text):
-            network.append(rel)
+def _skill_dirs(folder: Path) -> list[str]:
+    return sorted({str(p.parent.relative_to(folder)).replace("\\", "/") or "."
+                   for p in folder.rglob("SKILL.md") if not (SKIP_DIRS & set(p.relative_to(folder).parts))})
+
+
+def inspect(folder: Path, only: Optional[list] = None) -> dict:
+    """Static checks on the skills that would be installed (all, or those named in `only`).
+    passed=False on credential-store access, env dumps, obfuscated exec, binaries, install hooks,
+    persistence. API keys a skill reads are listed in needs_keys; network use in network_files."""
+    findings, network, keys = [], [], set()
+    skills = [s for s in _skill_dirs(folder) if not only or Path(s).name in only]
+    roots = [folder] if "." in skills else [folder / s for s in skills]
+    seen = set()
+    for root in roots:
+        for p in sorted(root.rglob("*")):
+            if not p.is_file() or p.name == ".white-meta.json" or p in seen:
+                continue
+            seen.add(p)
+            parts = set(p.relative_to(folder).parts)
+            if SKIP_DIRS & parts:
+                continue  # caches and vendored deps are never copied, so never run
+            rel = str(p.relative_to(folder)).replace("\\", "/")
+            ext = p.suffix.lower()
+            if ext in BINARY_EXT:
+                findings.append({"file": rel, "issue": "binary file"})
+                continue
+            if p.name.lower() in INSTALL_HOOKS:
+                findings.append({"file": rel, "issue": "install hook"})
+            if ext not in TEXT_EXT and not p.name.startswith("."):
+                continue  # images, fonts: data only
+            text = p.read_text(encoding="utf-8", errors="replace")
+            if p.name == "package.json" and re.search(r'"(pre|post)?install"\s*:', text):
+                findings.append({"file": rel, "issue": "npm install hook"})
+            rules = BLOCK_ANY + (BLOCK_CODE if ext in CODE_EXT else [])
+            for issue, rx in rules:
+                m = rx.search(text)
+                if m and issue == "dumps all environment variables" and ext in CODE_EXT and not NETWORK.search(text):
+                    continue  # env copied for a subprocess is normal; env + network in one file is exfiltration
+                if m:
+                    findings.append({"file": rel, "issue": issue, "match": m.group(0)[:80]})
+            if ext in CODE_EXT:
+                keys.update(ENV_KEY.findall(text))
+                if NETWORK.search(text):
+                    network.append(rel)
     if not skills:
-        findings.append({"file": "-", "issue": "no SKILL.md: not a skill"})
-    return {"passed": not findings, "findings": findings, "network_files": network, "skills": skills}
+        findings.append({"file": "-", "issue": "no SKILL.md: not a skill" if not only else f"no skill named {only}"})
+    return {"passed": not findings, "findings": findings, "network_files": network,
+            "needs_keys": sorted(keys), "skills": skills}
+
+
+def _has_license(folder: Path, skill_dir: Path) -> bool:
+    for d in (skill_dir, folder):
+        if any(d.glob("LICENSE*")) or any(d.glob("license*")) or any(d.glob("COPYING*")):
+            return True
+    return False
 
 
 def _frontmatter_ok(skill_md: Path) -> Optional[str]:
@@ -232,15 +269,16 @@ def install(home: Path, folder: Path, why: str, only: Optional[list] = None) -> 
     `only`: skill folder names to take from a multi-skill repo (default: all)."""
     if not (why or "").strip():
         raise ValueError("say which task needs this skill")
-    report = inspect(folder)
+    report = inspect(folder, only)
     if not report["passed"]:
         return {"installed": [], "blocked": report["findings"]}
     meta = json.loads((folder / ".white-meta.json").read_text(encoding="utf-8"))
     installed, problems = [], []
     for rel in report["skills"]:
-        if only and Path(rel).name not in only:
-            continue
         src = folder / rel if rel != "." else folder
+        if meta.get("license") in (None, "", "NOASSERTION") and not _has_license(folder, src):  # per-skill licenses
+            problems.append({"skill": rel, "issue": "no license file for this skill"})
+            continue
         bad = _frontmatter_ok(src / "SKILL.md")
         if bad:
             problems.append({"skill": rel, "issue": bad})
@@ -249,12 +287,14 @@ def install(home: Path, folder: Path, why: str, only: Optional[list] = None) -> 
         dst = home / "skills" / "scouted" / name
         if dst.exists():
             shutil.rmtree(dst)
-        shutil.copytree(src, dst, ignore=shutil.ignore_patterns(".white-meta.json", ".git*"))
+        shutil.copytree(src, dst, ignore=shutil.ignore_patterns(".white-meta.json", ".git*", *SKIP_DIRS))
         installed.append(name)
     reg = [r for r in registry(home) if r["name"] not in installed]
     for name in installed:
         reg.append({"name": name, "repo": meta["repo"], "stars": meta["stars"], "license": meta["license"],
-                    "why": why, "network": report["network_files"], "installed": time.time()})
+                    "why": why, "network": report["network_files"], "needs_keys": report["needs_keys"],
+                    "installed": time.time()})
     (home / "white").mkdir(parents=True, exist_ok=True)
     (home / "white" / "scout.json").write_text(json.dumps(reg, indent=2), encoding="utf-8")
-    return {"installed": installed, "problems": problems, "network_files": report["network_files"]}
+    return {"installed": installed, "problems": problems, "network_files": report["network_files"],
+            "needs_keys": report["needs_keys"]}
