@@ -50,5 +50,6 @@ else
 fi
 
 say "Step 5 of 5: opening the Hermes desktop app..."
-(hermes desktop >/dev/null 2>&1 &)
-printf '\n  Done. In the app: pick "white" and say: hi\n  White will walk you through the rest.\n  If the app doesn'"'"'t open, run:  hermes desktop\n\n'
+echo "  The very first launch may build the app (5-10 minutes). Progress shows below; the app opens when ready."
+printf '\n  When the app opens: pick "white" and say: hi. White walks you through the rest.\n\n'
+hermes desktop </dev/tty

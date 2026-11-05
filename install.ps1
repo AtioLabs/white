@@ -87,9 +87,11 @@ if (-not $hasModel) {
 
 # 5. Desktop
 Say "Step 5 of 5: opening the Hermes desktop app..."
-Start-Process -FilePath $Hermes -ArgumentList "desktop" -WindowStyle Hidden
+Write-Host "  A second window opens for the app. The very first time it may need to build itself,"
+Write-Host "  which can take 5-10 minutes. Leave that window open; the app appears when it's ready."
+Start-Process -FilePath $Hermes -ArgumentList "desktop"
 Write-Host ""
-Write-Host "  Done. In the app: pick 'white' in the sidebar and say: hi" -ForegroundColor Green
+Write-Host "  Done. When the app opens: pick 'white' in the sidebar and say: hi" -ForegroundColor Green
 Write-Host "  White will walk you through the rest (your profile, WhatsApp, your apps)."
-Write-Host "  If the app doesn't open, run:  hermes desktop"
+Write-Host "  If no app appears, run:  hermes desktop"
 Write-Host ""
