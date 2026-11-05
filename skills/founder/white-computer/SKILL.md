@@ -1,6 +1,6 @@
 ---
 name: white-computer
-description: "Use any app on the founder's computer through its accessibility tree (agent-desktop), not screenshots."
+description: "Use any desktop app via its accessibility tree."
 version: 0.1.0
 author: Asrul Ishath (asynarch), Hermes Agent
 license: MIT
