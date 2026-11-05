@@ -17,7 +17,7 @@
 
 ## Why White
 
-Founders in SF have a founder's office: someone who chases the follow-ups, builds the model, finds the design partners, preps the meetings and tells them what they're neglecting. Most founders everywhere else have a chat box and a to-do list.
+Well-funded founders have a founder's office: someone who chases the follow-ups, builds the model, finds the design partners, preps the meetings and tells them what they're neglecting. Early-stage founders, the ones who need it most, can't afford one yet. They have a chat box and a to-do list.
 
 Today's agents made that worse in a new way: **you have to know what to ask.** You end up as the prompter, the project manager and the reviewer of your own assistant.
 
@@ -168,4 +168,4 @@ python -m pytest plugins bench -q && python bench/core_bench.py
 
 [MIT](LICENSE). Built on [Hermes Agent](https://github.com/NousResearch/hermes-agent) by Nous Research. Third-party notices in [NOTICE](NOTICE).
 
-<div align="center"><sub>Built by <a href="https://www.asynarch.com">Asrul Ishath</a>, a founder outside SF, for founders outside SF.</sub></div>
+<div align="center"><sub>Built by <a href="https://www.asynarch.com">Asrul Ishath</a>, an early-stage founder, for early-stage founders.</sub></div>
